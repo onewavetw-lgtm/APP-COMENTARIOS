@@ -1,0 +1,155 @@
+# LowWave — pesquisa de público / guia para Windows
+
+O app procura vídeos do YouTube sobre um assunto, baixa comentários públicos principais,
+remove spam e repetições e gera um texto para copiar ou baixar. Não usa IA nem precisa
+de chave do ChatGPT. A busca considera qualquer época por padrão e vídeos com pelo menos um comentário.
+Você pode priorizar relevância (padrão) ou visualizações e ajustar o período e o mínimo.
+As respostas aos comentários não são coletadas.
+
+## Atualizações sem copiar arquivos manualmente
+
+1. Baixe a nova versão de **LowWave-Atualizacao.zip** e feche a janela preta do app.
+2. Extraia todos os arquivos do ZIP em uma pasta separada (botão direito → Extrair Tudo).
+3. Abra **Atualizar LowWave.bat**, ao lado da pasta `arquivos`.
+4. Na primeira vez, uma janela pede a pasta onde o app já está instalado. Escolha a
+   pasta que contém **Abrir Coletor.bat**. O local será lembrado no seu computador.
+5. Aguarde a mensagem de sucesso e abra seu atalho habitual. Use **Ctrl+F5** no navegador.
+
+Nas próximas atualizações, basta baixar, extrair e abrir **Atualizar LowWave.bat**;
+não será necessário escolher a pasta de novo enquanto ela permanecer no mesmo local.
+Não é necessário copiar os itens da pasta `arquivos` manualmente.
+A chave `.env` e a pasta `.venv` não são substituídas. Quando os requisitos mudarem,
+o iniciador atualizará as dependências na próxima abertura.
+Os arquivos anteriores são guardados em `.lowwave-backups` na pasta instalada.
+Se houver falha ao copiar, o atualizador tenta restaurar os arquivos anteriores.
+O local da instalação é salvo em `%LOCALAPPDATA%\LowWave\instalacao.json`.
+
+O atualizador não busca versões na internet. Cada novo pacote é baixado pelo usuário.
+Atualização direta pelo app dependerá de um endereço de publicação fixo e confiável.
+O nome escolhido é LowWave.
+
+## 1. Preparar o computador uma única vez
+
+1. Instale **Python 3.12 de 64 bits** pelo site oficial: https://www.python.org/downloads/windows/.
+   No instalador, mantenha **Python Launcher** e **pip** selecionados. Marque **Add python.exe to PATH**.
+2. Extraia **todos** os arquivos do ZIP para uma pasta fixa, por exemplo
+   `C:\Coletor-Comentarios`. Não execute os arquivos de dentro do ZIP.
+3. Dê dois cliques em **Abrir Coletor.bat**. Na primeira vez ele instala as dependências
+   pela internet e abre o navegador; aguarde. Não precisa digitar comandos.
+
+Não mova a pasta depois de criar o atalho. Se a instalação for interrompida, feche a
+janela, exclua somente a subpasta `.venv` e abra novamente **Abrir Coletor.bat**.
+
+## 2. Criar a chave gratuita do YouTube
+
+1. Entre em https://console.cloud.google.com/ com sua conta Google.
+2. No seletor de projetos, no topo, escolha **Novo projeto**. Dê um nome, como
+   **Coletor de Comentários**, e clique em **Criar**. Selecione esse projeto.
+3. Vá a **APIs e serviços → Biblioteca**. Procure **YouTube Data API v3**.
+   Abra o resultado e clique em **Ativar**.
+4. Nesse mesmo projeto, abra **APIs e serviços → Credenciais → Criar credenciais → Chave de API**.
+   Copie a chave criada. Os nomes dos botões podem variar conforme o idioma do Google.
+5. Abra a configuração dessa chave. Em **Restrições de API**, escolha **Restringir chave**,
+   marque **YouTube Data API v3** e salve. Para este app Python local, não use restrição
+   por site/HTTP referrer. Restrição por IP só funciona com o IP público correto do computador.
+6. Aguarde alguns minutos para a ativação e as restrições se propagarem.
+
+A API tem uma **cota gratuita diária**; não é acesso ilimitado. Para esse fluxo não é
+necessário contratar plano pago. Consulte a disponibilidade em **APIs e serviços →
+YouTube Data API v3 → Cotas e limites do sistema**. Se a cota acabar, o app avisa;
+aguarde a renovação diária. Os limites vigentes do seu projeto aparecem no console.
+
+Documentação oficial: https://developers.google.com/youtube/v3/getting-started
+e https://developers.google.com/youtube/v3/determine_quota_cost.
+
+## 3. Onde colocar a chave
+
+1. Dê dois cliques em **Configurar Chave.bat**. Ele cria o arquivo `.env`, se ainda não
+   existir, e o abre no Bloco de Notas.
+2. Deixe a linha da chave assim, substituindo o exemplo pela sua chave verdadeira:
+
+   ```text
+   YOUTUBE_API_KEY=SUA_CHAVE_AQUI
+   ```
+
+3. Salve com **Ctrl+S** e feche o Bloco de Notas. Feche e abra novamente o app, caso
+   ele já estivesse rodando. A chave será preenchida automaticamente e aparecerá oculta.
+
+Também pode colar a chave diretamente no campo **Chave YouTube API**, dentro de **Chave de acesso**, na lateral do app;
+nesse caso, ela não é salva em arquivo pelo app. Nunca envie sua chave no chat nem
+compartilhe o arquivo `.env`. Ele foi incluído no `.gitignore` para evitar envio ao Git.
+
+## 4. Fazer a primeira pesquisa
+
+1. Abra **Abrir Coletor.bat** e mantenha a janela de execução aberta.
+2. No navegador, o tema **motobomba a gasolina** já estará preenchido.
+   Você pode substituí-lo por qualquer tema ou colocar várias buscas, uma por linha.
+3. Abra **Ajustar coleta e filtros**. Para a primeira coleta, selecione **1 vídeo**, **50 comentários por vídeo** e deixe
+   desmarcado **Manter só comentários com palavras de dor**.
+4. Clique em **Coletar comentários** e aguarde.
+5. Veja os totais, o resumo e o texto. Clique em **Baixar pesquisa .txt** para salvar o resultado.
+   A aba **Texto para o ChatGPT** permite copiar; **Vídeos e fontes** mostra a origem.
+   A análise das dores é feita no ChatGPT, não automaticamente pelo LowWave.
+
+Em **Orientação para a análise no ChatGPT**, você pode editar o pedido que acompanha
+o arquivo. O prompt padrão busca descobrir a dor sem escolher um problema antes.
+
+Se houver poucos vídeos, abra **Ajustar coleta e filtros**: use **0** em período para
+qualquer época, mínimo de **1 comentário** e **Relevância para a busca**. Aumente a
+quantidade de vídeos (até 50) ou as páginas por termo (até 3, com até 50 vídeos cada).
+Mais páginas usam mais cota da API. A busca da API não replica os resultados
+personalizados da página do YouTube. Termos distintos são intercalados e vídeos repetidos
+entram uma vez. O painel **Entenda quantos vídeos entraram na pesquisa** explica
+repetições, vídeos sem detalhes, descartes pelo mínimo e cortes pelo limite de quantidade.
+Se nenhum comentário passar, reduza **Mínimo de letras por comentário**.
+“Acesso negado” pede conferir a chave, a API ativada e suas restrições;
+“cota acabou” pede aguardar a renovação. O app não confunde essas falhas com
+comentários desativados.
+
+## 5. Abrir todo dia com um clique
+
+1. Depois da instalação inicial, dê dois cliques em **Criar Atalho.bat**.
+   Ele cria **LowWave** na Área de Trabalho.
+2. Clique nesse atalho com o botão direito e escolha **Fixar na barra de tarefas**.
+   No Windows 11 pode ser necessário abrir **Mostrar mais opções** primeiro.
+3. A partir daí, **um clique no ícone da barra de tarefas** inicia o app e abre o navegador.
+   Se o Windows não oferecer a opção de fixar, use o atalho da Área de Trabalho com dois cliques.
+4. Mantenha a janela de execução aberta enquanto usa o app. Para encerrar, pressione
+   **Ctrl+C** nela ou feche a janela. Fechar só a aba do navegador deixa o app rodando.
+
+Se já estiver rodando e o navegador não abrir, use o endereço exibido na janela de
+execução. Não abra uma segunda instância na mesma porta.
+
+## Estado de validação
+
+- Dependências instaladas e verificadas em Python 3.12 no ambiente Linux da nuvem.
+- Servidor Streamlit iniciado; página e verificação de saúde respondendo com HTTP 200.
+- Interface escura conferida em Chromium nos tamanhos de computador e celular.
+- **28 testes automatizados aprovados** (21 da aplicação e 7 do atualizador), incluindo interface e coleta com o assunto
+  “crina de cavalo crescer”, usando **respostas simuladas**. Esses comentários são
+  dados sintéticos de teste, não uma coleta real do YouTube.
+- Corrigidos: falhas de API ocultadas como comentários desativados, exposição da chave
+  em erros, excesso sobre o limite total e permanência de resultado antigo após falha.
+- **Coleta real pendente de chave válida.** Nesta nuvem, também é necessário aplicar
+  o acesso de rede a `www.googleapis.com`, salvo no rascunho da configuração.
+- Os iniciadores do Windows foram preparados, mas não foram executados em Windows:
+  a máquina de testes disponível é Linux.
+
+## Uso nesta nuvem e desenvolvimento
+
+Nas configurações do ambiente, forneça `YOUTUBE_API_KEY` pelo campo seguro, revise e
+salve as alterações de rede e scripts, e publique o ambiente. Não coloque a chave nos
+scripts nem no chat. Salvar o rascunho não aplica as alterações nem publica o ambiente.
+O endereço local exibido pelo servidor é usado para validação interna; este fluxo
+de onboarding não fornece uma prévia web acessível pelo navegador do seu computador.
+Para uso diário no Windows, use o pacote local descrito acima.
+
+```sh
+cd /workspace/APP-COMENTARIOS
+python3 -m venv /workspace/.venvs/coletor
+/workspace/.venvs/coletor/bin/python -m pip install -r requirements-dev.txt
+/workspace/.venvs/coletor/bin/python -m pytest -q
+/workspace/.venvs/coletor/bin/python -m streamlit run coletor_de_comentarios.py --server.address 127.0.0.1 --server.port 8501 --server.headless true --browser.gatherUsageStats false
+```
+
+Não é necessário criar worktree: use o checkout existente do ambiente isolado.
