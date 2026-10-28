@@ -218,6 +218,7 @@ export function analysisFile(job: Job) {
   const selected = new Set(filteredRows(job));
   return {
     ...template,
+    configuracao_da_coleta: { ...job.settings },
     coleta: {
       situacao: job.phase === "done" ? "concluida" : "parcial",
       videos_previstos: job.selected.length,

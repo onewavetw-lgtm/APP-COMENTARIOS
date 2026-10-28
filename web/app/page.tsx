@@ -12,6 +12,7 @@ import {
 } from "@/lib/model";
 import { advance, RequestError, YouTubeData } from "@/lib/engine";
 import { loadJob, saveJob } from "@/lib/storage";
+import { archiveLegacyJob } from "@/lib/library";
 import { DEFAULT_KEYWORDS, DEFAULT_PROMPT } from "@/lib/defaults";
 function download(name: string, text: string, type: string) {
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -49,9 +50,10 @@ export default function Home() {
     controller = useRef<AbortController | null>(null);
   useEffect(() => {
     loadJob()
-      .then((saved) => {
+      .then(async (saved) => {
         setJob(saved);
         if (saved) {
+          await archiveLegacyJob(saved);
           setTerms(saved.settings.terms.join("\n"));
           setLinks(
             saved.settings.links
@@ -265,6 +267,7 @@ export default function Home() {
           </span>
         </a>
         <nav>
+          <a href="/biblioteca">▤ Biblioteca de pesquisas</a>
           {[
             ["search", "◎ Nova pesquisa"],
             ["results", "▤ Resultados e fontes"],
@@ -693,7 +696,8 @@ export default function Home() {
                 <div className="comments">
                   {selected.slice(0, 100).map((r, i) => (
                     <blockquote key={i}>
-                      {r.comentario}
+                      <strong>{r.autor || "Autor não informado"}</strong>
+                      <p>{r.comentario}</p>
                       <small>
                         {r.video} · {r.curtidas} curtidas
                       </small>

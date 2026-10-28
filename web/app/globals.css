@@ -445,3 +445,42 @@ button:hover:not(:disabled) {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.library-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+.library-comment {
+  border: 1px solid #30465c;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 18px 0;
+  background: #111e2b;
+}
+.original {
+  white-space: pre-wrap;
+  color: #edf4ff;
+  overflow-wrap: anywhere;
+}
+.library-comment pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+}
+.file-button {
+  border: 1px solid #33485d;
+  border-radius: 10px;
+  background: #172838;
+  padding: 12px;
+  margin: 0;
+  max-width: 100%;
+  cursor: pointer;
+}
+.file-button input {
+  max-width: 240px;
+}
+.tabs {
+  flex-wrap: wrap;
+}

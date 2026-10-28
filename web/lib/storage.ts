@@ -1,4 +1,5 @@
 import type { Job } from "./model";
+import { archiveJob } from "./library";
 async function database() {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const req = indexedDB.open("lowwave-web", 1);
@@ -24,6 +25,7 @@ export async function saveJob(job: Job | null) {
           ),
         );
     });
+    if (job) await archiveJob(job);
   } finally {
     db.close();
   }

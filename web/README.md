@@ -49,7 +49,7 @@ as instruções do exportador Python. Testes usam respostas simuladas, não a co
 2. Escolher **Root Directory: web** (obrigatório) e framework **Next.js**.
 3. Usar Node.js 24; instalação `npm ci`, build `npm run build`. Manter os demais padrões.
 4. Não é necessário fornecer chave YouTube como variável de ambiente: ela é digitada
-   pelo visitante. Não há banco de dados, serviço pago de IA ou worker externo nesta versão.
+   pelo visitante. Não há banco de dados no servidor, serviço pago de IA ou worker externo nesta versão.
 5. Publicar e testar uma coleta pequena usando uma chave real. Conferir os logs,
    duração das funções, consumo de recursos e limites/condições do plano escolhido.
 6. Usar o endereço confirmado pela Vercel; nenhum endereço público foi gerado localmente.
@@ -79,7 +79,7 @@ página personalizada do YouTube; idioma é preferência e Shorts não têm filt
 
 ## Validação atual
 
-- 11 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
+- 14 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
 - Verificação TypeScript e build de produção.
 - Navegador com API simulada: coleta completa, download real do JSON, persistência
   após recarga sem guardar a chave e tela mobile sem rolagem horizontal indevida.
@@ -106,3 +106,39 @@ da pesquisa; a chave continua fora do armazenamento.
 
 Verificado no navegador com API simulada: cinco atalhos, navegação mobile, prompt
 editado no JSON/TXT, reaplicação de filtros sem solicitações adicionais e restauração.
+
+
+## Biblioteca local
+
+`/biblioteca` guarda pesquisas no IndexedDB `lowwave-library`, independente do
+checkpoint atual (`lowwave-web`). Novas páginas de comentários são arquivadas
+sem requisições adicionais ao YouTube. O checkpoint anterior à atualização é
+migrado uma vez. Limpar o checkpoint não exclui pesquisas arquivadas.
+
+- Importa `lowwave-analise-v1` até 25 MB, com prévia e nome. Confere a lista inteira
+  de registros; totais declarados não substituem a contagem real.
+- Uma impressão SHA-256 do JSON canônico identifica arquivos iguais, inclusive
+  com diferenças de espaços/ordem das chaves. Não deduplica relatos por texto.
+- Fonte original preservada separadamente de nome/status, anotações, favoritos e
+  relatório externo. Download original não incorpora interpretações.
+- Nomes públicos dos autores são exibidos quando presentes; não há inferência de gênero.
+- Comentários paginados em 50 registros, busca por autor/texto/vídeo, metadados e
+  fontes do YouTube. Conteúdo importado nunca é executado ou renderizado como HTML.
+- Linguagem: sequências literais normalizadas de 2 a 4 palavras, contadas uma vez
+  por registro, número de vídeos identificados e exemplos; não classifica dores.
+- Relatórios TXT/MD podem ser importados como texto (até 2 MB).
+- Backup `lowwave-biblioteca-v1` inclui fonte, notas e relatórios. Restauração
+  valida todas as pesquisas e integridade das fontes antes de gravar; IDs existentes
+  são preservados, sem substituir notas. Nenhuma chave de API é incluída.
+
+Não há conta/sincronização ou persistência no servidor. Limpeza do navegador e
+modo privado podem eliminar a biblioteca. Faça backup e restaure no outro aparelho.
+Importação, consulta, expressões, anotações e backup não usam a API do YouTube.
+
+
+Validação da biblioteca: 14 testes Node aprovados e build/TypeScript aprovados.
+Navegador de produção com dados fictícios: importação, arquivo repetido, nomes,
+anotações/favoritos, fonte original intacta, contagem literal por registro/vídeo,
+recarga, backup restaurado em contexto vazio, mobile e ausência de chamadas ao
+YouTube. Coleta com API simulada confirma arquivamento automático e preservação
+da exclusão de pesquisa sem recriar o checkpoint ao abrir a biblioteca.
