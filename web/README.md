@@ -1,0 +1,87 @@
+# LowWave Web — Vercel
+
+Versão independente em Next.js, na pasta `web/`. O app Windows continua na raiz;
+este projeto não importa, altera ou instala dependências no aplicativo local.
+
+## Arquitetura
+
+- Página React com o tema escuro/ciano do LowWave.
+- Cada POST `/api/youtube` faz **uma única chamada** a um endpoint fixo da API oficial.
+- Timeout upstream de 18 segundos; função configurada com duração máxima de 30s.
+- Paginação e pausas por 429 acontecem no navegador, sem função dormindo por minutos.
+- O navegador coordena a pesquisa e grava cada página bem-sucedida em IndexedDB.
+- Busca intercalada entre termos, seleção por relevância/visualizações e links prioritários.
+- Arquivo `lowwave-analise.json` mantém `formato`, `instrucoes`, `total_registros` e
+  `comentarios`, compatíveis com o plugin. Um campo adicional `coleta` informa parcial/
+  concluída, vídeos previstos/finalizados e avisos. Não existe classificação por IA no app.
+- CSV completo e TXT filtrado também podem ser baixados.
+
+A chave é fornecida pelo visitante, usada na memória da página e enviada no corpo do
+POST ao servidor. Não é gravada no IndexedDB, nos arquivos exportados ou no código.
+Não configurar uma chave compartilhada `NEXT_PUBLIC_*`. A rota não imprime parâmetros,
+corpos de erros do Google ou credenciais. As respostas usam `Cache-Control: no-store`.
+O hostname upstream é fixo e os parâmetros são validados; não há proxy de URLs arbitrárias.
+
+## Desenvolvimento
+
+Node.js 24 e npm. Na pasta `web/`:
+
+```sh
+npm ci
+npm run dev
+```
+
+Validação:
+
+```sh
+npm run test
+npm run typecheck
+npm run build
+npm run start
+```
+
+As dependências estão fixadas no package-lock.json. `analysis-template.json` reaproveita
+as instruções do exportador Python. Testes usam respostas simuladas, não a cota real.
+
+## Publicar na Vercel
+
+1. Importar `onewavetw-lgtm/APP-COMENTARIOS` pelo GitHub na conta do usuário.
+2. Escolher **Root Directory: web** (obrigatório) e framework **Next.js**.
+3. Usar Node.js 24; instalação `npm ci`, build `npm run build`. Manter os demais padrões.
+4. Não é necessário fornecer chave YouTube como variável de ambiente: ela é digitada
+   pelo visitante. Não há banco de dados, serviço pago de IA ou worker externo nesta versão.
+5. Publicar e testar uma coleta pequena usando uma chave real. Conferir os logs,
+   duração das funções, consumo de recursos e limites/condições do plano escolhido.
+6. Usar o endereço confirmado pela Vercel; nenhum endereço público foi gerado localmente.
+
+O projeto foi desenhado para chamadas curtas, mas isso não comprova adequação a todo
+volume ou ao plano gratuito. Limites e termos atuais da Vercel devem ser conferidos
+antes de uso contínuo. Hospedar não remove a cota nem os bloqueios do YouTube.
+
+## Progresso e privacidade
+
+O progresso pertence a este navegador/dispositivo e inclui comentários públicos e seus
+metadados. Não há sincronização, conta de usuário ou armazenamento de pesquisas no
+servidor. Use uma única aba para a coleta; exporte antes de iniciar outra pesquisa,
+limpar dados do navegador ou usar navegação privada. O botão Limpar remove o checkpoint.
+Uma pesquisa nova pede confirmação antes de substituir o checkpoint anterior.
+
+Recarregar ou fechar a página interrompe a coordenação. Após abrir de novo, informe
+a chave e clique **Continuar coleta**. Nenhuma requisição começa automaticamente.
+Se uma página não foi confirmada/salva, pode ser consultada novamente na retomada.
+Se a gravação local falhar, o app avisa; exporte os registros disponíveis.
+
+Um erro 429 faz até três novas tentativas no navegador, respeitando Retry-After de até
+60s. Esperas maiores ou limite persistente pausam e exibem cooldown; erros de cota
+não são retentados automaticamente. O checkpoint permanece disponível para exportação.
+Não há garantia de disponibilidade da API. Resultados da busca podem diferir da
+página personalizada do YouTube; idioma é preferência e Shorts não têm filtro próprio.
+
+## Validação atual
+
+- 9 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
+- Verificação TypeScript e build de produção.
+- Navegador com API simulada: coleta completa, download real do JSON, persistência
+  após recarga sem guardar a chave e tela mobile sem rolagem horizontal indevida.
+- Endpoint de produção rejeitando operação inválida sem expor credenciais.
+- Coleta real e execução na Vercel ainda dependem de configuração da conta e chave válida.
