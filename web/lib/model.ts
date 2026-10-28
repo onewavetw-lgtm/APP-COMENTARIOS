@@ -1,4 +1,5 @@
 import template from "./analysis-template.json";
+import { DEFAULT_PROMPT } from "./defaults";
 export type Video = {
   id: string;
   title: string;
@@ -38,6 +39,8 @@ export type Settings = {
   order: string;
   painOnly: boolean;
   keywords: string[];
+  prompt?: string;
+  includePrompt?: boolean;
 };
 export type Job = {
   id: string;
@@ -192,6 +195,25 @@ export function filteredRows(job: Job) {
   }
   return selected;
 }
+export function researchPrompt(job: Job) {
+  return (job.settings.prompt ?? DEFAULT_PROMPT).replaceAll(
+    "{assunto}",
+    job.settings.terms.join(", ") || "Vídeos informados por link",
+  );
+}
+export function textFile(job: Job) {
+  const header =
+    job.settings.includePrompt !== false ? researchPrompt(job) + "\n\n" : "";
+  return (
+    header +
+    filteredRows(job)
+      .map(
+        (r) =>
+          `=== ${r.video} ===\n- (${r.curtidas} likes) ${r.comentario.replace(/\s+/g, " ")}`,
+      )
+      .join("\n\n")
+  );
+}
 export function analysisFile(job: Job) {
   const selected = new Set(filteredRows(job));
   return {
@@ -202,7 +224,7 @@ export function analysisFile(job: Job) {
       videos_finalizados: job.video,
       avisos: job.warnings,
     },
-    orientacao_da_pesquisa: `Pesquise dores sem presumir uma vencedora. Temas: ${job.settings.terms.join(", ")}.`,
+    orientacao_da_pesquisa: researchPrompt(job),
     total_registros: job.rows.length,
     comentarios: job.rows.map((row) => ({
       ...row,

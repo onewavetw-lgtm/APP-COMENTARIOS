@@ -6,6 +6,7 @@ import {
   parseLinks,
   analysisFile,
   filteredRows,
+  textFile,
   Settings,
 } from "../lib/model";
 import { advance, RequestError, YouTubeData } from "../lib/engine";
@@ -177,4 +178,46 @@ test("JSON parcial é explícito e filtro de dor não é obrigatório", () => {
   const job = newJob(settings);
   assert.equal(analysisFile(job).coleta.situacao, "parcial");
   assert.deepEqual(filteredRows(job), []);
+});
+
+test("prompt editado acompanha JSON e TXT sem perder registros excluídos do filtro", async () => {
+  let job = newJob({
+    ...settings,
+    links: [id],
+    onlyLinks: true,
+    painOnly: true,
+    keywords: ["termo-ausente"],
+    prompt: "Descubra dores sobre {assunto}. Confira as fontes.",
+    includePrompt: true,
+  });
+  job = await advance(job, async () => ({ items: [video()] }));
+  job = await advance(job, async () => ({ items: [comment("c1")] }));
+  const before = JSON.stringify(job.rows);
+  assert.equal(filteredRows(job).length, 0);
+  const exported = analysisFile(job);
+  assert.equal(exported.total_registros, 1);
+  assert.equal(exported.comentarios[0].incluido_no_txt, false);
+  assert.equal(
+    exported.orientacao_da_pesquisa,
+    "Descubra dores sobre motobomba. Confira as fontes.",
+  );
+  assert.equal(textFile(job).trim(), exported.orientacao_da_pesquisa);
+  job.settings.includePrompt = false;
+  assert.equal(textFile(job), "");
+  assert.equal(
+    analysisFile(job).orientacao_da_pesquisa,
+    exported.orientacao_da_pesquisa,
+  );
+  assert.equal(JSON.stringify(job.rows), before);
+});
+test("progresso antigo sem campos de prompt continua exportável", async () => {
+  let job = newJob({ ...settings, terms: [], links: [id], onlyLinks: true });
+  job = await advance(job, async () => ({ items: [video()] }));
+  job = await advance(job, async () => ({ items: [comment("c1")] }));
+  assert.match(
+    analysisFile(job).orientacao_da_pesquisa,
+    /Vídeos informados por link/,
+  );
+  assert.match(textFile(job), /Ainda não sei qual é essa dor/);
+  assert.match(textFile(job), /Minha motobomba/);
 });

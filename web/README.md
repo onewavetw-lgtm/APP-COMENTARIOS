@@ -79,9 +79,30 @@ página personalizada do YouTube; idioma é preferência e Shorts não têm filt
 
 ## Validação atual
 
-- 9 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
+- 11 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
 - Verificação TypeScript e build de produção.
 - Navegador com API simulada: coleta completa, download real do JSON, persistência
   após recarga sem guardar a chave e tela mobile sem rolagem horizontal indevida.
 - Endpoint de produção rejeitando operação inválida sem expor credenciais.
 - Coleta real e execução na Vercel ainda dependem de configuração da conta e chave válida.
+
+
+## Navegação, prompt e filtros
+
+O menu leva às seções da página, inclusive antes de haver resultados. Os atalhos
+Palavras de dor e Prompt para o ChatGPT abrem os respectivos painéis. Eles também
+estão disponíveis no celular.
+
+A orientação editável é salva na pesquisa e exportada no campo
+`orientacao_da_pesquisa` do JSON. No TXT, a inclusão do prompt é opcional.
+`{assunto}` é substituído pelos temas da pesquisa. Checkpoints anteriores sem esses
+campos continuam compatíveis e usam o prompt padrão.
+
+Depois da coleta, edite filtros ou prompt e clique em **Aplicar aos comentários
+salvos** ou **Aplicar prompt à pesquisa salva**. Isso atualiza a prévia, a seleção
+do TXT e as marcações no JSON/CSV sem chamar o YouTube. JSON e CSV preservam todos
+os registros baixados, mesmo os excluídos do TXT. Recarregar restaura as configurações
+da pesquisa; a chave continua fora do armazenamento.
+
+Verificado no navegador com API simulada: cinco atalhos, navegação mobile, prompt
+editado no JSON/TXT, reaplicação de filtros sem solicitações adicionais e restauração.

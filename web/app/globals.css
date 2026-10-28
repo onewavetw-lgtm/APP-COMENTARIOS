@@ -94,7 +94,7 @@ nav a {
   padding: 13px 10px;
   font-size: 12px;
 }
-nav a:first-child {
+nav a[aria-current="location"] {
   background: #112f43;
   border: 1px solid #2c526a;
   border-radius: 10px;
@@ -382,7 +382,7 @@ progress {
 button:hover:not(:disabled) {
   filter: brightness(1.13);
 }
-section[id] {
+[id] {
   scroll-margin-top: 20px;
 }
 @media (max-width: 850px) {
@@ -396,7 +396,10 @@ section[id] {
     padding: 20px;
   }
   nav {
-    display: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0;
   }
   .brand {
     margin: 0 0 20px;

@@ -8,9 +8,11 @@ import {
   analysisFile,
   csvFile,
   filteredRows,
+  textFile,
 } from "@/lib/model";
 import { advance, RequestError, YouTubeData } from "@/lib/engine";
 import { loadJob, saveJob } from "@/lib/storage";
+import { DEFAULT_KEYWORDS, DEFAULT_PROMPT } from "@/lib/defaults";
 function download(name: string, text: string, type: string) {
   const url = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement("a");
@@ -33,9 +35,10 @@ export default function Home() {
     [letters, setLetters] = useState(20),
     [maxText, setMaxText] = useState(300),
     [painOnly, setPainOnly] = useState(false),
-    [keywords, setKeywords] = useState(
-      "não funciona, não consigo, problema, defeito, ajuda, tentei",
-    );
+    [keywords, setKeywords] = useState(DEFAULT_KEYWORDS),
+    [prompt, setPrompt] = useState(DEFAULT_PROMPT),
+    [includePrompt, setIncludePrompt] = useState(true),
+    [section, setSection] = useState("search");
   const [job, setJob] = useState<Job | null>(null),
     [busy, setBusy] = useState(false),
     [ready, setReady] = useState(false),
@@ -46,7 +49,30 @@ export default function Home() {
     controller = useRef<AbortController | null>(null);
   useEffect(() => {
     loadJob()
-      .then(setJob)
+      .then((saved) => {
+        setJob(saved);
+        if (saved) {
+          setTerms(saved.settings.terms.join("\n"));
+          setLinks(
+            saved.settings.links
+              .map((id) => `https://www.youtube.com/watch?v=${id}`)
+              .join("\n"),
+          );
+          setOnlyLinks(saved.settings.onlyLinks);
+          setPages(saved.settings.pages);
+          setVideos(saved.settings.videos);
+          setPerVideo(saved.settings.perVideo);
+          setDays(saved.settings.days);
+          setOrder(saved.settings.order);
+          setMinimum(saved.settings.minimum);
+          setLetters(saved.settings.letters);
+          setMaxText(saved.settings.maxText);
+          setPainOnly(saved.settings.painOnly);
+          setKeywords(saved.settings.keywords.join(", "));
+          setPrompt(saved.settings.prompt ?? DEFAULT_PROMPT);
+          setIncludePrompt(saved.settings.includePrompt !== false);
+        }
+      })
       .catch((e) => setMessage(e.message))
       .finally(() => setReady(true));
     return () => {
@@ -171,12 +197,48 @@ export default function Home() {
         letters,
         maxText,
         painOnly,
+        prompt,
+        includePrompt,
         keywords: keywords
           .split(",")
           .map((k) => k.trim().toLowerCase())
           .filter(Boolean),
       };
       void run(newJob(settings));
+    } catch (e) {
+      setMessage((e as Error).message);
+    }
+  }
+  function navigate(target: string) {
+    setSection(target);
+    const element = document.getElementById(target);
+    if (element instanceof HTMLDetailsElement) element.open = true;
+    element?.scrollIntoView({ behavior: "smooth", block: "start" });
+    element?.focus({ preventScroll: true });
+  }
+  async function applyExportSettings() {
+    if (!job || active.current) return;
+    const updated: Job = {
+      ...job,
+      settings: {
+        ...job.settings,
+        letters,
+        maxText,
+        painOnly,
+        prompt,
+        includePrompt,
+        keywords: keywords
+          .split(",")
+          .map((k) => k.trim().toLowerCase())
+          .filter(Boolean),
+      },
+    };
+    setJob(updated);
+    try {
+      await saveJob(updated);
+      setMessage(
+        "Filtros e prompt aplicados aos dados salvos. Nenhuma consulta ao YouTube foi feita.",
+      );
     } catch (e) {
       setMessage((e as Error).message);
     }
@@ -203,9 +265,25 @@ export default function Home() {
           </span>
         </a>
         <nav>
-          <a href="#search">◎ Nova pesquisa</a>
-          <a href="#results">▤ Resultados e fontes</a>
-          <a href="#export">↗ Exportar pesquisa</a>
+          {[
+            ["search", "◎ Nova pesquisa"],
+            ["results", "▤ Resultados e fontes"],
+            ["filters", "◇ Palavras de dor e filtros"],
+            ["prompts", "✎ Prompt para o ChatGPT"],
+            ["export", "↗ Exportar pesquisa"],
+          ].map(([target, label]) => (
+            <a
+              key={target}
+              href={`#${target}`}
+              aria-current={section === target ? "location" : undefined}
+              onClick={(event) => {
+                event.preventDefault();
+                navigate(target);
+              }}
+            >
+              {label}
+            </a>
+          ))}
         </nav>
         <label className="key">
           CHAVE DO YOUTUBE
@@ -254,7 +332,7 @@ export default function Home() {
         <div className="steps">
           01 Pesquisar <i /> 02 Conferir fontes <i /> 03 Levar para análise
         </div>
-        <div id="search" className="grid">
+        <div id="search" className="grid" tabIndex={-1}>
           <section>
             <div className="card">
               <small>NOVA PESQUISA</small>
@@ -295,8 +373,6 @@ export default function Home() {
                       1,
                       100,
                     ],
-                    ["Mínimo de letras", letters, setLetters, 10, 100],
-                    ["Máximo no texto filtrado", maxText, setMaxText, 50, 1000],
                   ].map(([label, value, set, min, max]) => (
                     <label key={String(label)}>
                       {String(label)}
@@ -325,27 +401,110 @@ export default function Home() {
                     <option value="viewCount">Mais visualizações</option>
                   </select>
                 </label>
+                <p>
+                  Mais páginas consomem mais cota. Português é uma preferência,
+                  não um filtro estrito de idioma.
+                </p>
+              </fieldset>
+            </details>
+            <details id="filters" tabIndex={-1}>
+              <summary>Palavras de dor e filtros do texto</summary>
+              <fieldset disabled={busy}>
+                <div className="controls">
+                  <label>
+                    Mínimo de letras por comentário
+                    <input
+                      type="number"
+                      min={10}
+                      max={100}
+                      value={letters}
+                      onChange={(e) =>
+                        setLetters(
+                          Math.max(10, Math.min(100, Number(e.target.value))),
+                        )
+                      }
+                    />
+                  </label>
+                  <label>
+                    Máximo no texto filtrado
+                    <input
+                      type="number"
+                      min={50}
+                      max={1000}
+                      value={maxText}
+                      onChange={(e) =>
+                        setMaxText(
+                          Math.max(50, Math.min(1000, Number(e.target.value))),
+                        )
+                      }
+                    />
+                  </label>
+                </div>
                 <label className="check">
                   <input
                     type="checkbox"
                     checked={painOnly}
                     onChange={(e) => setPainOnly(e.target.checked)}
                   />
-                  Manter só palavras de dor
+                  Manter só comentários com palavras de dor
                 </label>
-                {painOnly && (
-                  <label>
-                    Palavras separadas por vírgula
-                    <input
-                      value={keywords}
-                      onChange={(e) => setKeywords(e.target.value)}
-                    />
-                  </label>
-                )}
+                <label>
+                  Palavras de dor (separadas por vírgula)
+                  <textarea
+                    value={keywords}
+                    onChange={(e) => setKeywords(e.target.value)}
+                    rows={4}
+                  />
+                </label>
                 <p>
-                  Mais páginas consomem mais cota. Português é uma preferência,
-                  não um filtro estrito de idioma.
+                  Para descobrir dores que você ainda não conhece, deixe o
+                  filtro desmarcado. As palavras filtram a prévia e o TXT. O
+                  JSON e o CSV mantêm todos os comentários baixados.
                 </p>
+                {job && (
+                  <button onClick={() => void applyExportSettings()}>
+                    Aplicar aos comentários salvos
+                  </button>
+                )}
+              </fieldset>
+            </details>
+            <details id="prompts" tabIndex={-1}>
+              <summary>Orientação para a análise no ChatGPT</summary>
+              <fieldset disabled={busy}>
+                <p>
+                  Esta orientação acompanha o JSON e pode abrir o TXT. Ela não
+                  restringe a busca no YouTube.
+                </p>
+                <label>
+                  Prompt para o ChatGPT (editável)
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    rows={12}
+                  />
+                </label>
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={includePrompt}
+                    onChange={(e) => setIncludePrompt(e.target.checked)}
+                  />
+                  Incluir prompt no início do TXT
+                </label>
+                <p>
+                  Use {"{assunto}"} para inserir automaticamente os temas
+                  pesquisados.
+                </p>
+                <div className="actions">
+                  <button onClick={() => setPrompt(DEFAULT_PROMPT)}>
+                    Restaurar prompt padrão
+                  </button>
+                  {job && (
+                    <button onClick={() => void applyExportSettings()}>
+                      Aplicar prompt à pesquisa salva
+                    </button>
+                  )}
+                </div>
               </fieldset>
             </details>
             <details>
@@ -408,214 +567,222 @@ export default function Home() {
           </div>
         )}
         {cooldown > 0 && <p>Nova tentativa disponível em {cooldown}s.</p>}
-        {job && (
-          <section id="results">
-            <div className="sectionTitle">
-              <div>
-                <small>SUA PESQUISA</small>
-                <h2>{stage}</h2>
-              </div>
-              <div className="actions">
-                {busy ? (
+        <section id="results" tabIndex={-1}>
+          {job ? (
+            <>
+              <div className="sectionTitle">
+                <div>
+                  <small>SUA PESQUISA</small>
+                  <h2>{stage}</h2>
+                </div>
+                <div className="actions">
+                  {busy ? (
+                    <button
+                      onClick={() => {
+                        active.current = false;
+                        controller.current?.abort();
+                      }}
+                    >
+                      Pausar
+                    </button>
+                  ) : (
+                    job.phase !== "done" && (
+                      <button
+                        disabled={!key.trim() || cooldown > 0}
+                        onClick={() => void run(job)}
+                      >
+                        Continuar coleta
+                      </button>
+                    )
+                  )}
                   <button
-                    onClick={() => {
-                      active.current = false;
-                      controller.current?.abort();
+                    disabled={busy}
+                    onClick={async () => {
+                      if (
+                        window.confirm(
+                          "Apagar o progresso salvo neste navegador?",
+                        )
+                      ) {
+                        await saveJob(null);
+                        setJob(null);
+                      }
                     }}
                   >
-                    Pausar
+                    Limpar
                   </button>
-                ) : (
-                  job.phase !== "done" && (
-                    <button
-                      disabled={!key.trim() || cooldown > 0}
-                      onClick={() => void run(job)}
-                    >
-                      Continuar coleta
-                    </button>
-                  )
-                )}
-                <button
-                  disabled={busy}
-                  onClick={async () => {
-                    if (
-                      window.confirm(
-                        "Apagar o progresso salvo neste navegador?",
-                      )
-                    ) {
-                      await saveJob(null);
-                      setJob(null);
-                    }
-                  }}
-                >
-                  Limpar
-                </button>
+                </div>
               </div>
-            </div>
-            <p className="muted">
-              Configuração desta pesquisa:{" "}
-              {job.settings.terms.join(" · ") || "Links informados"}. O
-              progresso não é sincronizado entre dispositivos.
-            </p>
-            <div className="stats">
-              <div>
-                <strong>{job.selected.length}</strong>vídeos selecionados
-              </div>
-              <div>
-                <strong>{job.video}</strong>vídeos finalizados
-              </div>
-              <div>
-                <strong>{job.rows.length}</strong>comentários baixados
-              </div>
-              <div>
-                <strong>{selected.length}</strong>selecionados para texto
-              </div>
-            </div>
-            <progress
-              aria-label="Progresso dos vídeos"
-              value={job.phase === "done" ? 1 : job.video}
-              max={job.phase === "done" ? 1 : Math.max(1, job.selected.length)}
-            />
-            <div className="tabs">
-              <button
-                aria-pressed={tab === "sources"}
-                onClick={() => setTab("sources")}
-              >
-                Vídeos e fontes
-              </button>
-              <button
-                aria-pressed={tab === "comments"}
-                onClick={() => setTab("comments")}
-              >
-                Comentários selecionados
-              </button>
-            </div>
-            {tab === "sources" ? (
-              <div className="table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Vídeo</th>
-                      <th>Visualizações</th>
-                      <th>Baixados</th>
-                      <th>Fonte</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {job.selected.map((v) => (
-                      <tr key={v.id}>
-                        <td>
-                          {v.title}
-                          <small>{v.channel}</small>
-                        </td>
-                        <td>{v.views.toLocaleString("pt-BR")}</td>
-                        <td>
-                          {job.rows.filter((r) => r.id_video === v.id).length}
-                        </td>
-                        <td>
-                          <a href={v.url} target="_blank" rel="noreferrer">
-                            Abrir vídeo ↗
-                          </a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {!job.selected.length && (
-                  <p>
-                    A seleção aparecerá após conferir os resultados da busca.
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="comments">
-                {selected.slice(0, 100).map((r, i) => (
-                  <blockquote key={i}>
-                    {r.comentario}
-                    <small>
-                      {r.video} · {r.curtidas} curtidas
-                    </small>
-                  </blockquote>
-                ))}
-                {selected.length > 100 && (
-                  <p>Prévia dos primeiros 100. A exportação inclui todos.</p>
-                )}
-              </div>
-            )}
-            {job.warnings.map((w, i) => (
-              <p className="notice" key={i}>
-                {w}
+              <p className="muted">
+                Configuração desta pesquisa:{" "}
+                {job.settings.terms.join(" · ") || "Links informados"}. O
+                progresso não é sincronizado entre dispositivos.
               </p>
-            ))}
-          </section>
-        )}
-        {job && job.rows.length > 0 && (
-          <section id="export" className="card export">
-            <small>LEVAR PARA SEU AGENTE</small>
-            <h2>Uma pesquisa. Um arquivo. Tudo para analisar.</h2>
-            <p>
-              {job.rows.length} comentários baixados com IDs, fontes e
-              instruções.{" "}
-              {job.phase !== "done" && (
-                <strong>Coleta parcial: há etapas pendentes.</strong>
-              )}
-            </p>
-            <button
-              className="primary full"
-              onClick={() =>
-                download(
-                  "lowwave-analise.json",
-                  JSON.stringify(analysisFile(job), null, 2),
-                  "application/json",
-                )
-              }
-            >
-              ↓ Baixar para análise
-            </button>
-            <p>
-              Mesmo formato do aplicativo local. O arquivo reúne todos os
-              registros baixados, não apenas os filtrados. O agente continua
-              responsável pela análise.
-            </p>
-            <details>
-              <summary>Outros formatos</summary>
-              <div className="actions">
+              <div className="stats">
+                <div>
+                  <strong>{job.selected.length}</strong>vídeos selecionados
+                </div>
+                <div>
+                  <strong>{job.video}</strong>vídeos finalizados
+                </div>
+                <div>
+                  <strong>{job.rows.length}</strong>comentários baixados
+                </div>
+                <div>
+                  <strong>{selected.length}</strong>selecionados para texto
+                </div>
+              </div>
+              <progress
+                aria-label="Progresso dos vídeos"
+                value={job.phase === "done" ? 1 : job.video}
+                max={
+                  job.phase === "done" ? 1 : Math.max(1, job.selected.length)
+                }
+              />
+              <div className="tabs">
                 <button
-                  onClick={() =>
-                    download("lowwave-dados.csv", csvFile(job), "text/csv")
-                  }
+                  aria-pressed={tab === "sources"}
+                  onClick={() => setTab("sources")}
                 >
-                  Baixar CSV
+                  Vídeos e fontes
                 </button>
                 <button
-                  onClick={() =>
-                    download(
-                      "lowwave-comentarios.txt",
-                      selected
-                        .map(
-                          (r) =>
-                            `=== ${r.video} ===\n- (${r.curtidas} likes) ${r.comentario.replace(/\s+/g, " ")}`,
-                        )
-                        .join("\n\n"),
-                      "text/plain",
-                    )
-                  }
+                  aria-pressed={tab === "comments"}
+                  onClick={() => setTab("comments")}
                 >
-                  Baixar TXT filtrado
+                  Comentários selecionados
                 </button>
               </div>
-            </details>
-          </section>
-        )}
-        {!job && (
-          <div className="empty">
-            ◎ Sua próxima pesquisa começa aqui.
-            <p>
-              Depois da coleta, os vídeos, comentários e exportações aparecem
-              neste espaço.
-            </p>
-          </div>
-        )}
+              {tab === "sources" ? (
+                <div className="table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Vídeo</th>
+                        <th>Visualizações</th>
+                        <th>Baixados</th>
+                        <th>Fonte</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {job.selected.map((v) => (
+                        <tr key={v.id}>
+                          <td>
+                            {v.title}
+                            <small>{v.channel}</small>
+                          </td>
+                          <td>{v.views.toLocaleString("pt-BR")}</td>
+                          <td>
+                            {job.rows.filter((r) => r.id_video === v.id).length}
+                          </td>
+                          <td>
+                            <a href={v.url} target="_blank" rel="noreferrer">
+                              Abrir vídeo ↗
+                            </a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {!job.selected.length && (
+                    <p>
+                      A seleção aparecerá após conferir os resultados da busca.
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="comments">
+                  {selected.slice(0, 100).map((r, i) => (
+                    <blockquote key={i}>
+                      {r.comentario}
+                      <small>
+                        {r.video} · {r.curtidas} curtidas
+                      </small>
+                    </blockquote>
+                  ))}
+                  {selected.length > 100 && (
+                    <p>Prévia dos primeiros 100. A exportação inclui todos.</p>
+                  )}
+                </div>
+              )}
+              {job.warnings.map((w, i) => (
+                <p className="notice" key={i}>
+                  {w}
+                </p>
+              ))}
+            </>
+          ) : (
+            <div className="empty">
+              <h2>Resultados e fontes</h2>
+              <p>
+                Os vídeos e comentários aparecerão aqui depois de iniciar uma
+                coleta. Nenhuma pesquisa foi feita ainda.
+              </p>
+            </div>
+          )}
+        </section>
+        <section id="export" className="card export" tabIndex={-1}>
+          {job && job.rows.length > 0 ? (
+            <>
+              <small>LEVAR PARA SEU AGENTE</small>
+              <h2>Uma pesquisa. Um arquivo. Tudo para analisar.</h2>
+              <p>
+                {job.rows.length} comentários baixados com IDs, fontes e
+                instruções.{" "}
+                {job.phase !== "done" && (
+                  <strong>Coleta parcial: há etapas pendentes.</strong>
+                )}
+              </p>
+              <button
+                className="primary full"
+                onClick={() =>
+                  download(
+                    "lowwave-analise.json",
+                    JSON.stringify(analysisFile(job), null, 2),
+                    "application/json",
+                  )
+                }
+              >
+                ↓ Baixar para análise
+              </button>
+              <p>
+                Mesmo formato do aplicativo local. O arquivo reúne todos os
+                registros baixados, não apenas os filtrados. O agente continua
+                responsável pela análise.
+              </p>
+              <details>
+                <summary>Outros formatos</summary>
+                <div className="actions">
+                  <button
+                    onClick={() =>
+                      download("lowwave-dados.csv", csvFile(job), "text/csv")
+                    }
+                  >
+                    Baixar CSV
+                  </button>
+                  <button
+                    onClick={() =>
+                      download(
+                        "lowwave-comentarios.txt",
+                        textFile(job),
+                        "text/plain",
+                      )
+                    }
+                  >
+                    Baixar TXT filtrado
+                  </button>
+                </div>
+              </details>
+            </>
+          ) : (
+            <>
+              <h2>Exportar pesquisa</h2>
+              <p>
+                Quando houver comentários baixados, você poderá baixar o JSON
+                para seu agente, o CSV completo ou o TXT filtrado.
+              </p>
+            </>
+          )}
+        </section>
         <footer>
           LowWave Web · A cota do YouTube continua valendo. Esta ferramenta não
           classifica dores automaticamente.
