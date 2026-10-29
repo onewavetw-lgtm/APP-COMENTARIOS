@@ -168,3 +168,18 @@ tentativas e a cada minuto. Indisponibilidade de armazenamento é sinalizada.
 Verificações: 17 testes Node, TypeScript/build e navegador com API simulada. O fluxo
 search/videos/comments soma 102 unidades; ajuste para 90%, troca de chave e recarga
 funcionam, sem credenciais no contador ou consultas extras para monitoramento.
+
+
+## Visual violeta / manifesto
+
+Paleta preta, violeta e azul inspirada na referência visual enviada pelo usuário.
+A abertura destaca “are we ever gonna be better than this?” com luz em gradiente e
+textura SVG local. O arquivo HTML fornecido foi tratado como referência: não foram
+importados scripts, rastreadores, conteúdo comercial ou dependências externas dele.
+
+Transições de botões/painéis e entradas ao rolar usam CSS e IntersectionObserver,
+com conteúdo visível por padrão. A preferência `prefers-reduced-motion` desativa
+animações e entradas; navegação programática também respeita essa preferência.
+Decoração ignora cliques e leitores de tela, sem chamadas à API ou imagens remotas.
+A biblioteca recebe a mesma paleta. Desktop/mobile, navegação, filtros, JSON/TXT e
+movimento reduzido foram verificados no navegador com API simulada; build aprovado.

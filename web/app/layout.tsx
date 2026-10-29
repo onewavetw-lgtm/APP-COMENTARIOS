@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import MotionEffects from "@/components/motion-effects";
 export const metadata: Metadata = {
   title: "LowWave · Pesquisa de público",
   description:
@@ -8,7 +9,10 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <MotionEffects />
+        {children}
+      </body>
     </html>
   );
 }

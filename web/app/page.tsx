@@ -220,7 +220,12 @@ export default function Home() {
     setSection(target);
     const element = document.getElementById(target);
     if (element instanceof HTMLDetailsElement) element.open = true;
-    element?.scrollIntoView({ behavior: "smooth", block: "start" });
+    element?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
     element?.focus({ preventScroll: true });
   }
   async function applyExportSettings() {
@@ -326,17 +331,29 @@ export default function Home() {
           <span>Seu espaço / Pesquisa de público</span>
           <span className="pill">YOUTUBE DATA API</span>
         </header>
-        <section className="hero">
-          <small>ESCUTE O PÚBLICO. ENCONTRE O PRÓXIMO PASSO.</small>
-          <h1>
-            Sua próxima descoberta
-            <br />
-            <em>começa aqui.</em>
-          </h1>
-          <p>
-            Reúna comentários, confira as fontes e leve as evidências para seu
-            agente.
-          </p>
+        <section className="hero" aria-labelledby="lowwave-manifesto">
+          <div className="hero-aura" aria-hidden="true">
+            <div className="aura-core" />
+          </div>
+          <div className="hero-content">
+            <small className="hero-eyebrow">
+              <span /> ESCUTE O PÚBLICO. ENCONTRE O PRÓXIMO PASSO.
+            </small>
+            <h1 id="lowwave-manifesto">
+              are we ever gonna be
+              <br />
+              <em>better than this?</em>
+            </h1>
+            <p>
+              As próximas ideias começam com quem você escuta. Reúna
+              comentários, encontre padrões e leve as evidências para seu
+              agente.
+            </p>
+            <div className="hero-signature">
+              <span className="signature-line" /> LOWWAVE <span>/</span> STAY
+              CURIOUS.
+            </div>
+          </div>
         </section>
         <div className="steps">
           01 Pesquisar <i /> 02 Conferir fontes <i /> 03 Levar para análise
