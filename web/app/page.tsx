@@ -13,6 +13,8 @@ import {
 import { advance, RequestError, YouTubeData } from "@/lib/engine";
 import { loadJob, saveJob } from "@/lib/storage";
 import { archiveLegacyJob } from "@/lib/library";
+import QuotaMeter, { QuotaMeterHandle } from "@/components/quota-meter";
+import type { QuotaAction } from "@/lib/quota";
 import { DEFAULT_KEYWORDS, DEFAULT_PROMPT } from "@/lib/defaults";
 function download(name: string, text: string, type: string) {
   const url = URL.createObjectURL(new Blob([text], { type }));
@@ -46,6 +48,7 @@ export default function Home() {
     [message, setMessage] = useState(""),
     [tab, setTab] = useState("sources"),
     [cooldown, setCooldown] = useState(0);
+  const quotaMeter = useRef<QuotaMeterHandle>(null);
   const active = useRef(false),
     controller = useRef<AbortController | null>(null);
   useEffect(() => {
@@ -109,6 +112,8 @@ export default function Home() {
             throw new Error(
               "Pesquisa pausada. Você pode continuar de onde parou.",
             );
+          await quotaMeter.current?.record(params.action as QuotaAction);
+          if (!active.current) throw new Error("Pesquisa pausada.");
           const response = await fetch("/api/youtube", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -304,6 +309,7 @@ export default function Home() {
           A chave fica nesta sessão e é enviada por conexão segura ao servidor
           para consultar o YouTube. Não é salva no progresso.
         </p>
+        <QuotaMeter ref={quotaMeter} apiKey={key} busy={busy} />
         <hr />
         <h4>SEU FLUXO</h4>
         <p>01 · Pesquise o público</p>

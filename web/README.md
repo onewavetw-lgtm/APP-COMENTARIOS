@@ -79,7 +79,7 @@ página personalizada do YouTube; idioma é preferência e Shorts não têm filt
 
 ## Validação atual
 
-- 14 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
+- 17 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
 - Verificação TypeScript e build de produção.
 - Navegador com API simulada: coleta completa, download real do JSON, persistência
   após recarga sem guardar a chave e tela mobile sem rolagem horizontal indevida.
@@ -142,3 +142,29 @@ anotações/favoritos, fonte original intacta, contagem literal por registro/ví
 recarga, backup restaurado em contexto vazio, mobile e ausência de chamadas ao
 YouTube. Coleta com API simulada confirma arquivamento automático e preservação
 da exclusão de pesquisa sem recriar o checkpoint ao abrir a biblioteca.
+
+
+## Barra de cota estimada
+
+O menu da coleta acompanha as tentativas feitas a `/api/youtube` neste navegador.
+Custos adotados para estimativa: search.list 100, videos.list 1 e commentThreads.list
+1 por chamada/página, incluindo repetições. Não consulta métricas do Cloud e não
+representa o saldo real do projeto. Falhas/cancelamentos podem ser contados mesmo
+sem alcançar o Google; consumo anterior, Windows, outros aparelhos e outras
+chaves do mesmo projeto não são descobertos pelo contador.
+
+Referência inicial editável de 10.000 unidades, com ajuste manual opcional para o
+consumo total conferido no Google Cloud. Um ajuste substitui o total estimado naquele
+momento e as próximas tentativas se somam a ele. Avisos visuais em 75%/90%; não
+bloqueia a coleta. A contagem diária segue America/Los_Angeles, inclusive horário de
+verão. Referência persiste; consumo e ajuste começam novamente no dia seguinte.
+
+IndexedDB `lowwave-quota` usa SHA-256 da chave como identificador, sem armazenar a
+credencial. Atualizações usam transações para evitar perda de contagens entre abas.
+O contador não integra exportações de pesquisa nem backup da biblioteca. Limpar os
+dados do navegador remove seu histórico. A tela atualiza ao trocar a chave, nas
+tentativas e a cada minuto. Indisponibilidade de armazenamento é sinalizada.
+
+Verificações: 17 testes Node, TypeScript/build e navegador com API simulada. O fluxo
+search/videos/comments soma 102 unidades; ajuste para 90%, troca de chave e recarga
+funcionam, sem credenciais no contador ou consultas extras para monitoramento.
