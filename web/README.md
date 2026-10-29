@@ -192,7 +192,7 @@ Build e carregamento real da fonte em desktop/mobile e biblioteca conferidos.
 ## Temas claro e escuro
 
 O botão no cabeçalho da coleta e da biblioteca alterna os temas. O modo padrão
-continua escuro, agora com base grafite mais clara (#19161f) e painéis mais visíveis.
+continua escuro, com degradê roxo baseado no #5F28C0 e painéis em violeta profundo.
 O claro usa superfícies brancas/lavanda e textos escuros, preservando o banner violeta.
 As cores de trabalho estão centralizadas em `app/themes.css`.
 
@@ -219,3 +219,9 @@ Ao abrir uma nova página, os campos de tema e palavras de dor começam vazios. 
 filtro por palavras começa desligado. Isso não altera as configurações ou dados
 das pesquisas arquivadas nem impede retomar o checkpoint. Para aplicar o filtro
 à prévia/TXT, o usuário precisa fornecer ao menos uma palavra própria.
+
+
+A paleta escura foi ajustada à logo com #5F28C0, degradê fixo no fundo e botões
+roxos com texto branco. O tema claro permanece disponível. Build e navegador
+conferidos em pesquisa/biblioteca, desktop/mobile, alternância de tema e campos
+vazios. Contraste das cores-base de texto/botões conferido em pelo menos 4,5:1.

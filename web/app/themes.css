@@ -1,23 +1,28 @@
-/* Shared work surfaces: dark has a lighter graphite base; light uses soft lavender. */
+/* Brand purple #5F28C0 anchors the dark gradient; light keeps soft lavender. */
 :root {
-  --page-bg: #19161f;
-  --page-glow: #70529614;
-  --panel-bg: #211c2a;
-  --panel-top: #292231;
-  --sidebar-bg: #16121d;
-  --field-bg: #19141f;
-  --stat-bg: #2b2335;
-  --surface-border: #a58bbb3d;
+  --page-bg: #32145f;
+  --page-background:
+    radial-gradient(ellipse at 88% 8%, #8951ee30, transparent 52%),
+    radial-gradient(ellipse at 0% 90%, #4a16a550, transparent 60%),
+    linear-gradient(135deg, #21103e 0%, #371561 52%, #5f28c0 100%);
+  --page-glow: #5f28c028;
+  --panel-bg: #24113f;
+  --panel-top: #351963;
+  --sidebar-bg: #1b0c33;
+  --sidebar-top: #291248;
+  --field-bg: #1c0d34;
+  --stat-bg: #3b1c68;
+  --surface-border: #c59aef42;
   --text-main: #f2edf9;
-  --text-muted: #beb0ce;
-  --text-label: #d3c6e3;
-  --text-small: #bfb0d1;
-  --text-link: #cebbff;
-  --button-bg: #33273f;
-  --button-hover: #40314f;
+  --text-muted: #d1c2e8;
+  --text-label: #e3d5f5;
+  --text-small: #d0bce7;
+  --text-link: #e0caff;
+  --button-bg: #48217c;
+  --button-hover: #5a2b95;
   --button-text: #eee4ff;
-  --focus: #bc99ff;
-  --shadow: #05020a25;
+  --focus: #c7a0ff;
+  --shadow: #14052f45;
   --violet-border: var(--surface-border);
   background: var(--page-bg);
   color: var(--text-main);
@@ -25,10 +30,13 @@
 :root[data-theme="light"] {
   color-scheme: light;
   --page-bg: #f3f0f8;
+  --page-background:
+    radial-gradient(ellipse at 95% 5%, #5f28c012, transparent 48%), #f3f0f8;
   --page-glow: #b49bdf20;
   --panel-bg: #ffffff;
   --panel-top: #ffffff;
   --sidebar-bg: #faf8ff;
+  --sidebar-top: #faf8ff;
   --field-bg: #faf8fd;
   --stat-bg: #f1ebfa;
   --surface-border: #d8cde6;
@@ -44,13 +52,12 @@
   --shadow: #5937740e;
 }
 body {
-  background:
-    radial-gradient(ellipse at 95% 5%, var(--page-glow), transparent 48%),
-    var(--page-bg);
+  background: var(--page-background);
+  background-attachment: fixed;
   color: var(--text-main);
 }
 aside {
-  background: var(--sidebar-bg);
+  background: linear-gradient(165deg, var(--sidebar-top), var(--sidebar-bg));
   border-color: var(--surface-border);
   scrollbar-color: #8e729e transparent;
 }
@@ -89,7 +96,7 @@ nav a:hover {
 }
 nav a[aria-current="location"] {
   color: var(--text-main);
-  background: #986dc624;
+  background: linear-gradient(110deg, #8544df52, #5f28c028);
   border-color: var(--surface-border);
 }
 .card {
@@ -131,13 +138,13 @@ button:hover:not(:disabled),
   border-color: var(--focus);
 }
 .primary {
-  background: linear-gradient(105deg, #bb9aff, #8760ed 55%, #6f60ed);
-  color: #10091e;
+  background: linear-gradient(105deg, #7f45de, #5f28c0 58%, #4434b7);
+  color: #ffffff;
   border-color: #b997e9;
 }
 .primary:hover:not(:disabled) {
-  color: #10091e;
-  background: linear-gradient(105deg, #c9b0ff, #9a76fa 55%, #8877ff);
+  color: #ffffff;
+  background: linear-gradient(105deg, #8649dc, #6d32ce 58%, #5040bf);
 }
 details {
   background: var(--field-bg);
