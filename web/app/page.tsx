@@ -17,7 +17,7 @@ import { loadJob, saveJob } from "@/lib/storage";
 import { archiveLegacyJob } from "@/lib/library";
 import QuotaMeter, { QuotaMeterHandle } from "@/components/quota-meter";
 import type { QuotaAction } from "@/lib/quota";
-import { DEFAULT_KEYWORDS, DEFAULT_PROMPT } from "@/lib/defaults";
+import { DEFAULT_PROMPT } from "@/lib/defaults";
 function download(name: string, text: string, type: string) {
   const url = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement("a");
@@ -40,7 +40,7 @@ export default function Home() {
     [letters, setLetters] = useState(20),
     [maxText, setMaxText] = useState(300),
     [painOnly, setPainOnly] = useState(false),
-    [keywords, setKeywords] = useState(DEFAULT_KEYWORDS),
+    [keywords, setKeywords] = useState(""),
     [prompt, setPrompt] = useState(DEFAULT_PROMPT),
     [includePrompt, setIncludePrompt] = useState(true),
     [section, setSection] = useState("search");
@@ -73,8 +73,6 @@ export default function Home() {
           setMinimum(saved.settings.minimum);
           setLetters(saved.settings.letters);
           setMaxText(saved.settings.maxText);
-          setPainOnly(saved.settings.painOnly);
-          setKeywords(saved.settings.keywords.join(", "));
           setPrompt(saved.settings.prompt ?? DEFAULT_PROMPT);
           setIncludePrompt(saved.settings.includePrompt !== false);
         }
@@ -172,6 +170,10 @@ export default function Home() {
   function start() {
     try {
       if (!key.trim()) throw new Error("Informe sua chave do YouTube.");
+      if (painOnly && !keywords.split(",").some((word) => word.trim()))
+        throw new Error(
+          "Digite suas palavras de dor ou desmarque o filtro de palavras de dor.",
+        );
       const queries = [
         ...new Set(
           terms
@@ -231,6 +233,12 @@ export default function Home() {
   }
   async function applyExportSettings() {
     if (!job || active.current) return;
+    if (painOnly && !keywords.split(",").some((word) => word.trim())) {
+      setMessage(
+        "Digite suas palavras de dor ou desmarque o filtro de palavras de dor.",
+      );
+      return;
+    }
     const updated: Job = {
       ...job,
       settings: {
@@ -477,6 +485,7 @@ export default function Home() {
                   Palavras de dor (separadas por vírgula)
                   <textarea
                     value={keywords}
+                    placeholder="Digite suas palavras, separadas por vírgula"
                     onChange={(e) => setKeywords(e.target.value)}
                     rows={4}
                   />
@@ -771,9 +780,9 @@ export default function Home() {
                 ↓ Baixar JSON para análise
               </button>
               <p>
-                Arquivo: lowwave-analise.json. Reúne todos os comentários baixados,
-                com IDs e fontes, inclusive os que ficaram fora do TXT filtrado.
-                É o arquivo para enviar ao seu Analista de Dores.
+                Arquivo: lowwave-analise.json. Reúne todos os comentários
+                baixados, com IDs e fontes, inclusive os que ficaram fora do TXT
+                filtrado. É o arquivo para enviar ao seu Analista de Dores.
               </p>
               <details>
                 <summary>Outros formatos</summary>

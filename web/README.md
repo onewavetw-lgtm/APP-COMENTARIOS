@@ -213,3 +213,9 @@ no tema claro. Next Image entrega a imagem dimensionada ao navegador.
 O menino é declarado nos metadados como ícone PNG da aba, atalho e Apple touch icon.
 Build e navegador conferiram logo nas duas páginas, resposta do favicon com hash
 igual ao original, temas e mobile sem rolagem horizontal indevida.
+
+
+Ao abrir uma nova página, os campos de tema e palavras de dor começam vazios. O
+filtro por palavras começa desligado. Isso não altera as configurações ou dados
+das pesquisas arquivadas nem impede retomar o checkpoint. Para aplicar o filtro
+à prévia/TXT, o usuário precisa fornecer ao menos uma palavra própria.
