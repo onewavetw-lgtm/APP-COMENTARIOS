@@ -1,4 +1,9 @@
 "use client";
+import {
+  BackgroundPaths,
+  AnimatedPhrase,
+} from "@/components/ui/background-paths";
+import { GlowCard } from "@/components/ui/spotlight-card";
 import NavItem from "@/components/nav-item";
 import Icon, { type IconName } from "@/components/icon";
 import Sidebar from "@/components/sidebar";
@@ -391,14 +396,22 @@ export default function Home() {
           <div className="hero-aura" aria-hidden="true">
             <div className="aura-core" />
           </div>
+          <BackgroundPaths />
           <div className="hero-content">
             <small className="hero-eyebrow">
               <span /> ESCUTE O PÚBLICO. ENCONTRE O PRÓXIMO PASSO.
             </small>
-            <h1 id="lowwave-manifesto">
-              are we ever gonna be
+            <h1
+              id="lowwave-manifesto"
+              aria-label="are we ever gonna be better than this?"
+            >
+              <span aria-hidden="true">
+                <AnimatedPhrase text="are we ever gonna be" />
+              </span>
               <br />
-              <em>better than this?</em>
+              <em aria-hidden="true">
+                <AnimatedPhrase text="better than this?" delay={260} />
+              </em>
             </h1>
             <p>
               As próximas ideias começam com quem você escuta. Reúna
@@ -471,7 +484,7 @@ export default function Home() {
         </nav>
         <div id="search" className="grid" tabIndex={-1}>
           <section>
-            <div className="card">
+            <GlowCard>
               <small>NOVA PESQUISA</small>
               <h2>Quem você quer entender?</h2>
               <p>
@@ -488,7 +501,7 @@ export default function Home() {
                   rows={5}
                 />
               </label>
-            </div>
+            </GlowCard>
             <Accordion>
               <summary>Ajustar coleta e filtros</summary>
               <fieldset disabled={busy}>
@@ -682,7 +695,7 @@ export default function Home() {
             </button>
           </section>
           <section>
-            <div className="card">
+            <GlowCard>
               <small>ANTES DE COMEÇAR</small>
               <h2>Sua próxima coleta</h2>
               <div className="stats two">
@@ -698,7 +711,7 @@ export default function Home() {
                 As consultas são sequenciais. Você pode pausar e continuar com o
                 progresso salvo neste navegador.
               </p>
-            </div>
+            </GlowCard>
           </section>
         </div>
         {message && (
@@ -939,7 +952,7 @@ export default function Home() {
             </div>
           )}
         </section>
-        <section id="export" className="card export" tabIndex={-1}>
+        <GlowCard as="section" id="export" className="export" tabIndex={-1}>
           {job && job.rows.length > 0 ? (
             <>
               <small>JSON · ARQUIVO COMPLETO PARA SEU AGENTE</small>
@@ -1005,7 +1018,7 @@ export default function Home() {
               </p>
             </>
           )}
-        </section>
+        </GlowCard>
         <footer>
           LowWave Web · A cota do YouTube continua valendo. Esta ferramenta não
           classifica dores automaticamente.

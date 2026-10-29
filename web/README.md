@@ -292,3 +292,26 @@ script, serviço externo ou conteúdo comercial da referência foi incorporado.
 Build e navegador conferidos: seis cores distintas nos dois temas, seleção exclusiva,
 navegação/acordeões, biblioteca, hover, drawer/teclado/mobile e redução de movimento.
 Esses efeitos não fazem consultas ao YouTube e não alteram o fluxo ou os dados.
+
+
+## Background Paths e Spotlight Card adaptados
+
+Os dois componentes de referência foram adaptados em `components/ui/` à estrutura
+Next/TypeScript e ao CSS existente, sem migração de framework ou dependências novas.
+Não foram incorporados demos, imagens externas ou botões sem função da referência.
+
+- `BackgroundPaths` usa 36 curvas SVG com geometria/duração determinísticas atrás
+  do banner existente. A frase do usuário tem entrada curta por letras e nome
+  acessível completo. As curvas pausam fora da viewport/aba oculta; movimento
+  reduzido mantém os desenhos estáticos. Há menos linhas visíveis no celular.
+- `GlowCard` envolve os cartões de pesquisa, próxima coleta, exportação, importação
+  e pesquisas salvas. O brilho usa coordenadas locais e requestAnimationFrame,
+  sem listeners globais de ponteiro. Bordas/pseudo-elementos não interceptam cliques.
+  Campo e conteúdo mantêm fundo opaco e dimensões responsivas.
+- Foco por teclado oferece realce estático. Telas de toque mantêm touch-action
+  nativo e rolagem livre. Redução de movimento suspende acompanhamento do cursor.
+
+Validação: TypeScript/build; navegador com API simulada conferindo curvas,
+acompanhamento local, saída do banner pausando animação, controles/cópia, 429 com
+pausa/retomada, onda de progresso, JSON completo, biblioteca e menu/mobile.
+Nenhuma chamada ao YouTube é realizada pelos efeitos ou pelos testes.

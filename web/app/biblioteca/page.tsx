@@ -1,4 +1,5 @@
 "use client";
+import { GlowCard } from "@/components/ui/spotlight-card";
 import NavItem from "@/components/nav-item";
 import Sidebar from "@/components/sidebar";
 import Accordion from "@/components/accordion";
@@ -309,7 +310,7 @@ export default function Library() {
               </label>
             </div>
             {pending && (
-              <section className="card export">
+              <GlowCard as="section" className="export">
                 <h2>Conferir importação</h2>
                 <p>
                   {pending.source.comentarios.length.toLocaleString("pt-BR")}{" "}
@@ -357,7 +358,7 @@ export default function Library() {
                     Cancelar importação
                   </button>
                 </div>
-              </section>
+              </GlowCard>
             )}
             <label>
               Buscar pesquisa salva
@@ -375,7 +376,7 @@ export default function Library() {
                     .includes(query.toLocaleLowerCase()),
                 )
                 .map((item) => (
-                  <article className="card" key={item.id}>
+                  <GlowCard as="article" key={item.id}>
                     <small>{item.status.toUpperCase()}</small>
                     <h2>{item.name}</h2>
                     <p>
@@ -402,7 +403,7 @@ export default function Library() {
                         Excluir
                       </button>
                     </div>
-                  </article>
+                  </GlowCard>
                 ))}
             </div>
             {!items.length && (

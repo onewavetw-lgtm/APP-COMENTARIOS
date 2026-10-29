@@ -1,0 +1,168 @@
+/* Components adapted from the supplied paths and spotlight references to existing work surfaces. */
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+.background-paths {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  color: #d0b2ff;
+  opacity: 0.7;
+  mask-image: linear-gradient(90deg, transparent 12%, #0005 42%, #000 72%);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 12%,
+    #0005 42%,
+    #000 72%
+  );
+}
+.background-paths svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.background-paths path {
+  stroke-dasharray: 0.32 0.68;
+  animation: path-travel var(--path-duration) linear var(--path-delay) infinite;
+  animation-play-state: paused;
+}
+.background-paths[data-running="true"] path {
+  animation-play-state: running;
+}
+@keyframes path-travel {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+.hero-content h1 {
+  animation: none;
+}
+.headline-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.headline-letter {
+  display: inline-block;
+  animation: letter-arrive 0.65s cubic-bezier(0.2, 0.8, 0.3, 1)
+    var(--letter-delay) both;
+}
+.hero h1 em {
+  background: none;
+  color: #c8afff;
+  -webkit-text-fill-color: initial;
+}
+.hero h1 em .headline-letter {
+  background: linear-gradient(135deg, #e9dfff, #b99aff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+@keyframes letter-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.glow-card {
+  position: relative;
+  isolation: isolate;
+  --spot-x: 50%;
+  --spot-y: 45%;
+}
+.glow-card:hover {
+  border-color: var(--surface-border);
+}
+.glow-card > * {
+  position: relative;
+  z-index: 1;
+}
+.glow-card::before,
+.glow-card::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 0;
+}
+.glow-card::before {
+  inset: -1px;
+  padding: 1px;
+  background: radial-gradient(
+    260px circle at var(--spot-x) var(--spot-y),
+    #e2cbff,
+    #ad80e899 30%,
+    transparent 72%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glow-card::after {
+  inset: 0;
+  background: radial-gradient(
+    340px circle at var(--spot-x) var(--spot-y),
+    #b48aff09,
+    transparent 72%
+  );
+}
+.glow-card[data-spotlight]::before,
+.glow-card[data-spotlight]::after,
+.glow-card:focus-within::before {
+  opacity: 1;
+}
+:root[data-theme="light"] .glow-card::before {
+  background: radial-gradient(
+    260px circle at var(--spot-x) var(--spot-y),
+    #8751c9,
+    #a16bca8c 30%,
+    transparent 72%
+  );
+}
+:root[data-theme="light"] .glow-card::after {
+  background: radial-gradient(
+    340px circle at var(--spot-x) var(--spot-y),
+    #8c55bd08,
+    transparent 72%
+  );
+}
+@media (max-width: 640px) {
+  .background-paths {
+    opacity: 0.5;
+  }
+  .background-paths path:nth-child(n + 10):nth-child(-n + 18),
+  .background-paths path:nth-child(n + 28) {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .background-paths path {
+    animation: none !important;
+    stroke-dasharray: none;
+    opacity: 0.55;
+  }
+  .headline-letter {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  .glow-card::before,
+  .glow-card::after {
+    transition: none;
+  }
+}
