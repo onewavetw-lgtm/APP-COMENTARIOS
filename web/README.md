@@ -187,3 +187,17 @@ movimento reduzido foram verificados no navegador com API simulada; build aprova
 A tipografia global usa Poppins (pesos 400, 500, 600 e 700), servida localmente via
 `@fontsource/poppins`; não depende de requisições ao Google Fonts no build ou na navegação.
 Build e carregamento real da fonte em desktop/mobile e biblioteca conferidos.
+
+
+## Temas claro e escuro
+
+O botão no cabeçalho da coleta e da biblioteca alterna os temas. O modo padrão
+continua escuro, agora com base grafite mais clara (#19161f) e painéis mais visíveis.
+O claro usa superfícies brancas/lavanda e textos escuros, preservando o banner violeta.
+As cores de trabalho estão centralizadas em `app/themes.css`.
+
+A preferência `lowwave-theme` é salva localmente, aplicada antes da hidratação e
+sincronizada entre abas por evento de armazenamento. Se salvar falhar, o tema muda
+na página e o botão informa que não foi possível guardar a preferência. Não modifica
+pesquisas nem faz chamadas ao YouTube. Build e navegador (alternância, recarga,
+biblioteca, teclado e mobile nos dois temas, sem erros de hidratação) conferidos.

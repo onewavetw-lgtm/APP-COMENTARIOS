@@ -1,4 +1,5 @@
 "use client";
+import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useMemo, useState } from "react";
 import {
   Research,
@@ -206,7 +207,10 @@ export default function Library() {
       <main>
         <header>
           <span>Seu espaço / Biblioteca de pesquisas</span>
-          <span className="pill">SEM CONSULTAS AO YOUTUBE</span>
+          <div className="header-actions">
+            <span className="pill">SEM CONSULTAS AO YOUTUBE</span>
+            <ThemeToggle />
+          </div>
         </header>
         <h1>{current ? current.name : "Biblioteca de pesquisas"}</h1>
         {message && (
@@ -607,7 +611,7 @@ export default function Library() {
                   <textarea
                     rows={18}
                     aria-label="Relatório recebido"
-                  value={current.report}
+                    value={current.report}
                     onChange={(e) => update({ report: e.target.value })}
                   />
                 </label>

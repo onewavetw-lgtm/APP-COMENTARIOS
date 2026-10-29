@@ -1,4 +1,5 @@
 "use client";
+import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useRef, useState } from "react";
 import {
   Job,
@@ -329,7 +330,10 @@ export default function Home() {
       <main>
         <header>
           <span>Seu espaço / Pesquisa de público</span>
-          <span className="pill">YOUTUBE DATA API</span>
+          <div className="header-actions">
+            <span className="pill">YOUTUBE DATA API</span>
+            <ThemeToggle />
+          </div>
         </header>
         <section className="hero" aria-labelledby="lowwave-manifesto">
           <div className="hero-aura" aria-hidden="true">
