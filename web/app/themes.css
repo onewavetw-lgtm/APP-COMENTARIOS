@@ -280,10 +280,9 @@ blockquote,
   display: block;
   width: 100%;
   max-width: 250px;
-  padding: 9px 8px;
-  border-radius: 12px;
-  background: #070f18;
-  border: 1px solid #b994ff20;
+  padding: 9px 0;
+  background: transparent;
+  border: 0;
   line-height: 0;
 }
 .brand-frame {
@@ -341,4 +340,15 @@ blockquote,
     font-size: clamp(29px, 5.5vw, 42px);
     letter-spacing: -1.5px;
   }
+}
+
+/* Preserve the original mascot colors while making white lettering readable on light surfaces. */
+.brand-frame .brand-wordmark-contrast {
+  display: none;
+}
+:root[data-theme="light"] .brand-frame .brand-wordmark-contrast {
+  display: block;
+  clip-path: inset(0 0 0 33%);
+  filter: brightness(0);
+  opacity: 0.85;
 }

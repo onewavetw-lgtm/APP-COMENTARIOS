@@ -205,10 +205,11 @@ biblioteca, teclado e mobile nos dois temas, sem erros de hidratação) conferid
 
 ## Identidade visual fornecida pelo usuário
 
-`public/brand/lowwave-logo.png` e `lowwave-boy.png` são os PNG originais recebidos
+`public/brand/lowwave-logo-transparent.png` e `lowwave-boy.png` são os PNG originais recebidos
 no ZIP, preservados byte a byte. O componente `Brand` usa a logo completa nas duas
-páginas, com enquadramento CSS para as margens e base escura para manter a leitura
-no tema claro. Next Image entrega a imagem dimensionada ao navegador.
+páginas, com enquadramento CSS para as margens e fundo transparente. No tema claro,
+uma camada visual em CSS escurece apenas as letras para manter a leitura, preservando
+as cores do menino e o PNG original. Next Image entrega a imagem dimensionada ao navegador.
 
 O menino é declarado nos metadados como ícone PNG da aba, atalho e Apple touch icon.
 Build e navegador conferiram logo nas duas páginas, resposta do favicon com hash
@@ -236,3 +237,9 @@ navegador (páginas, temas, campos vazios e mobile) conferidos.
 A referência original preta/violeta foi restaurada após a revisão de cores. O aumento
 de claridade é pequeno e aplicado aos fundos, bordas e cartões, preservando o degradê
 roxo da abertura. Build e navegador conferidos em ambos os temas e no celular.
+
+
+A versão Photoroom transparente substitui a anterior com fundo. O arquivo é idêntico
+ao enviado (RGBA, 2172×724), e a base/borda escura do menu foi removida. Favicon do
+menino preservado. Build e navegador (temas, duas páginas, leitura no claro, mobile,
+resposta do PNG conferida por SHA-256) aprovados.
