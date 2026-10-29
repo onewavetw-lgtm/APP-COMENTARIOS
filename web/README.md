@@ -183,3 +183,7 @@ animações e entradas; navegação programática também respeita essa preferê
 Decoração ignora cliques e leitores de tela, sem chamadas à API ou imagens remotas.
 A biblioteca recebe a mesma paleta. Desktop/mobile, navegação, filtros, JSON/TXT e
 movimento reduzido foram verificados no navegador com API simulada; build aprovado.
+
+A tipografia global usa Poppins (pesos 400, 500, 600 e 700), servida localmente via
+`@fontsource/poppins`; não depende de requisições ao Google Fonts no build ou na navegação.
+Build e carregamento real da fonte em desktop/mobile e biblioteca conferidos.
