@@ -192,7 +192,7 @@ Build e carregamento real da fonte em desktop/mobile e biblioteca conferidos.
 ## Temas claro e escuro
 
 O botão no cabeçalho da coleta e da biblioteca alterna os temas. O modo padrão
-continua escuro, com base azul-marinho e painéis em azul acinzentado. O violeta fica nos detalhes e botões.
+continua escuro, com preto/roxo e reflexos violetas, ligeiramente clareados para leitura.
 O claro usa superfícies brancas/lavanda e textos escuros, preservando o banner violeta.
 As cores de trabalho estão centralizadas em `app/themes.css`.
 
@@ -227,7 +227,12 @@ conferidos em pesquisa/biblioteca, desktop/mobile, alternância de tema e campos
 vazios. Contraste das cores-base de texto/botões conferido em pelo menos 4,5:1.
 
 
-Refinamento visual: superfícies de trabalho em azul-marinho, violeta restrito ao
-banner e destaques, bordas discretas e contraste mais claro entre campos e cartões.
+Refinamento visual: superfícies de trabalho em roxo profundo, degradê violeta da
+referência original, bordas discretas e contraste mais claro entre campos e cartões.
 Manifesto mais compacto. Tema claro e identidade original preservados. Build e
 navegador (páginas, temas, campos vazios e mobile) conferidos.
+
+
+A referência original preta/violeta foi restaurada após a revisão de cores. O aumento
+de claridade é pequeno e aplicado aos fundos, bordas e cartões, preservando o degradê
+roxo da abertura. Build e navegador conferidos em ambos os temas e no celular.

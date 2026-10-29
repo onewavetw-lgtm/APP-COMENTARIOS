@@ -1,27 +1,33 @@
-/* Midnight blue work surfaces with selective violet brand accents. */
+/* Original black/violet atmosphere, with a small brightness lift for readability. */
 :root {
-  --page-bg: #14202e;
+  --page-bg: #170f22;
   --page-background:
-    radial-gradient(ellipse at 90% 0%, #7956c710, transparent 48%),
-    linear-gradient(180deg, #14202e, #101a27);
-  --page-glow: #7956c710;
-  --panel-bg: #1a2533;
-  --panel-top: #1d2b3b;
-  --sidebar-bg: #0c1520;
-  --sidebar-top: #101b29;
-  --field-bg: #111c29;
-  --stat-bg: #233347;
-  --surface-border: #384b625e;
-  --text-main: #f4f7fc;
-  --text-muted: #b5c2d3;
-  --text-label: #d4deec;
-  --text-small: #adbbce;
-  --text-link: #cbbaff;
-  --button-bg: #28374b;
-  --button-hover: #34465e;
-  --button-text: #edf1fc;
-  --focus: #b79aff;
-  --shadow: #040b152e;
+    radial-gradient(ellipse at 100% 0%, #5927a838, transparent 52%),
+    radial-gradient(
+      ellipse at 112% 100%,
+      #ba8bff1a,
+      #5f20ce16 28%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, #170f22, #120c1b);
+  --page-glow: #5927a838;
+  --panel-bg: #21162d;
+  --panel-top: #291c39;
+  --sidebar-bg: #120c1b;
+  --sidebar-top: #191022;
+  --field-bg: #160e20;
+  --stat-bg: #30203f;
+  --surface-border: #a580ce45;
+  --text-main: #f4effb;
+  --text-muted: #c6b7da;
+  --text-label: #dfd1f0;
+  --text-small: #c4aedb;
+  --text-link: #d3baff;
+  --button-bg: #30203f;
+  --button-hover: #412b57;
+  --button-text: #f0e6ff;
+  --focus: #bb96ff;
+  --shadow: #0d041b38;
   --violet-border: var(--surface-border);
   background: var(--page-bg);
   color: var(--text-main);
@@ -313,14 +319,14 @@ blockquote,
 }
 :root:not([data-theme="light"]) .hero {
   border-color: #5e557c48;
-  background: #0d1421;
+  background: #0b0813;
 }
 :root:not([data-theme="light"]) .hero-aura {
-  opacity: 0.83;
+  opacity: 0.93;
 }
 .card:hover {
   border-color: var(--focus);
-  box-shadow: 0 10px 32px -25px #070e1c66;
+  box-shadow: 0 10px 32px -25px #0d051a66;
 }
 .pill {
   font-size: 8px;
