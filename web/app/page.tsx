@@ -1,8 +1,5 @@
 "use client";
-import {
-  BackgroundPaths,
-  AnimatedPhrase,
-} from "@/components/ui/background-paths";
+import ResearchHero from "@/components/ui/research-hero";
 import { GlowCard } from "@/components/ui/spotlight-card";
 import NavItem from "@/components/nav-item";
 import Icon, { type IconName } from "@/components/icon";
@@ -392,38 +389,16 @@ export default function Home() {
             <ThemeToggle />
           </div>
         </header>
-        <section className="hero" aria-labelledby="lowwave-manifesto">
-          <div className="hero-aura" aria-hidden="true">
-            <div className="aura-core" />
-          </div>
-          <BackgroundPaths />
-          <div className="hero-content">
-            <small className="hero-eyebrow">
-              <span /> ESCUTE O PÚBLICO. ENCONTRE O PRÓXIMO PASSO.
-            </small>
-            <h1
-              id="lowwave-manifesto"
-              aria-label="are we ever gonna be better than this?"
-            >
-              <span aria-hidden="true">
-                <AnimatedPhrase text="are we ever gonna be" />
-              </span>
-              <br />
-              <em aria-hidden="true">
-                <AnimatedPhrase text="better than this?" delay={260} />
-              </em>
-            </h1>
-            <p>
-              As próximas ideias começam com quem você escuta. Reúna
-              comentários, encontre padrões e leve as evidências para seu
-              agente.
-            </p>
-            <div className="hero-signature">
-              <span className="signature-line" /> LOWWAVE <span>/</span> STAY
-              CURIOUS.
-            </div>
-          </div>
-        </section>
+        <ResearchHero
+          busy={busy}
+          onStart={() => {
+            navigate(busy ? "results" : "search");
+            if (!busy)
+              document
+                .querySelector<HTMLTextAreaElement>("#search textarea")
+                ?.focus({ preventScroll: true });
+          }}
+        />
         <nav className="workflow-steps" aria-label="Etapas da pesquisa">
           {[
             {

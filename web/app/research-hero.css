@@ -1,0 +1,348 @@
+/* A horizon of light + glass CTA, preserving the original black/violet gradient. */
+.hero.hero-horizon {
+  min-height: 460px;
+  padding: 54px 34px 34px;
+  text-align: center;
+  border-radius: 24px;
+  border-color: #c39beb38;
+  background: #0b0813;
+  box-shadow: 0 24px 75px -45px #4b1c7a70;
+}
+.hero.hero-horizon .hero-content {
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero.hero-horizon .hero-aura {
+  opacity: 0.76;
+  background:
+    radial-gradient(
+      ellipse at 100% 125%,
+      #e3c5ff 0%,
+      #ad76e2 12%,
+      #722bd342,
+      transparent 57%
+    ),
+    radial-gradient(ellipse at 50% 0%, #6b2dde42, transparent 65%);
+}
+.hero.hero-horizon .aura-core {
+  background: radial-gradient(
+    ellipse at 42% 56%,
+    #08050de8 0%,
+    #0a0513cf 30%,
+    transparent 65%
+  );
+  inset: -10%;
+  animation: none;
+  transform: none;
+}
+.horizon-light {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.horizon-rim {
+  position: absolute;
+  width: 140%;
+  height: 650px;
+  left: -20%;
+  top: -586px;
+  border-radius: 50%;
+  border: 1px solid #e5ccff9c;
+  background: radial-gradient(ellipse at 50% 100%, #d4aaff1c, transparent 48%);
+  box-shadow:
+    0 5px 15px #e9c8ff40,
+    0 20px 65px #a460f577,
+    0 55px 120px #752de84d,
+    inset 0 -12px 40px #8d48dc20;
+  animation: horizon-open 1.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.horizon-haze {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: -50px;
+  height: 155px;
+  background: radial-gradient(ellipse, #b17bff38, transparent 70%);
+  filter: blur(20px);
+  animation: horizon-open 1.4s ease-out both;
+}
+.hero.hero-horizon .background-paths {
+  opacity: 0.38;
+  mask-image: linear-gradient(180deg, transparent 15%, #0005 55%, #000 100%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    transparent 15%,
+    #0005 55%,
+    #000 100%
+  );
+}
+.hero.hero-horizon::after {
+  opacity: 0.26;
+}
+.hero-frame-corners {
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  z-index: 0;
+  border: 1px solid #c1a0e611;
+  border-radius: 15px;
+}
+.hero-frame-corners i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  color: #cbb0e85c;
+}
+.hero-frame-corners i::before,
+.hero-frame-corners i::after {
+  content: "";
+  position: absolute;
+  inset: 4px 0 auto;
+  height: 1px;
+  background: currentColor;
+}
+.hero-frame-corners i::after {
+  transform: rotate(90deg);
+}
+.hero-frame-corners i:nth-child(1) {
+  left: 8px;
+  top: 8px;
+}
+.hero-frame-corners i:nth-child(2) {
+  right: 8px;
+  top: 8px;
+}
+.hero-frame-corners i:nth-child(3) {
+  left: 8px;
+  bottom: 8px;
+}
+.hero-frame-corners i:nth-child(4) {
+  right: 8px;
+  bottom: 8px;
+}
+.hero.hero-horizon .hero-eyebrow {
+  justify-content: center;
+  font-size: 8px;
+  letter-spacing: 1.7px;
+  line-height: 1.7;
+  padding: 7px 12px;
+  border: 1px solid #e4caff21;
+  border-radius: 30px;
+  background: #9c6ccb0c;
+  max-width: 100%;
+}
+.hero.hero-horizon h1 {
+  font-size: clamp(32px, 4.4vw, 62px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -2.8px;
+  margin: 24px 0 18px;
+  max-width: 100%;
+  text-align: center;
+}
+.hero.hero-horizon h1 em .headline-letter {
+  background-image: linear-gradient(145deg, #f2e6ff, #cdb0ff 55%, #ac96ff);
+}
+.hero.hero-horizon p {
+  max-width: 540px;
+  margin: 0 auto;
+  color: #c7bad9;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+.hero.hero-horizon .hero-actions {
+  animation: hero-enter 0.7s ease-out 0.3s both;
+}
+.hero .liquid-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 49px;
+  padding: 12px 22px;
+  border: 1px solid #d9bdff73;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #dfc8ff25, #9c6ed51a), #231137;
+  color: #fcf7ff;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow:
+    inset 0 1px 0 #ffffff30,
+    0 7px 30px #a45ce226;
+  backdrop-filter: blur(10px);
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+.hero .liquid-button::before {
+  content: "";
+  position: absolute;
+  inset: -100% -70%;
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    #e6d2ff28 48%,
+    transparent 62%
+  );
+  transform: translateX(-35%);
+  transition: transform 0.65s;
+  pointer-events: none;
+  z-index: -1;
+}
+.hero .liquid-button:hover,
+.hero .liquid-button:focus-visible {
+  background: linear-gradient(135deg, #dfc8ff35, #9c6ed524), #2a173e;
+  border-color: #e2caffb3;
+  box-shadow:
+    inset 0 1px 0 #ffffff45,
+    0 9px 35px #a66ae243;
+  transform: translateY(-1px);
+  color: #fff;
+}
+.hero .liquid-button:is(:hover, :focus-visible)::before {
+  transform: translateX(35%);
+}
+.hero .liquid-button > svg:last-child {
+  width: 15px;
+  transition: transform 0.2s;
+}
+.hero .liquid-button:is(:hover, :focus-visible) > svg:last-child {
+  transform: translateX(3px);
+}
+.hero .liquid-button:focus-visible,
+.hero-library-link:focus-visible {
+  outline: 2px solid #c5a0ff;
+  outline-offset: 4px;
+}
+.hero-library-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 49px;
+  padding: 12px 19px;
+  border-radius: 30px;
+  border: 1px solid #c4a6e629;
+  background: #a475cd08;
+  color: #d6c7e9;
+  font-size: 12px;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.hero-library-link:hover {
+  background: #c2a1eb12;
+  border-color: #d4b6f44d;
+  color: #fff;
+}
+.hero.hero-horizon .hero-signature {
+  margin-top: 27px;
+  font-size: 8px;
+  letter-spacing: 2.3px;
+  justify-content: center;
+  color: #a99abf;
+  gap: 12px;
+}
+.hero.hero-horizon .hero-signature .signature-line:last-child {
+  transform: rotate(180deg);
+}
+@keyframes horizon-open {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 1100px) {
+  .hero.hero-horizon {
+    padding: 48px 24px 30px;
+  }
+  .hero.hero-horizon h1 {
+    font-size: clamp(32px, 4.4vw, 52px);
+    letter-spacing: -2px;
+  }
+}
+@media (max-width: 850px) {
+  .hero.hero-horizon {
+    padding: 40px 22px 28px;
+    min-height: 420px;
+  }
+  .hero.hero-horizon h1 {
+    font-size: clamp(29px, 6.9vw, 43px);
+    letter-spacing: -1.6px;
+    margin-top: 23px;
+  }
+  .hero.hero-horizon p {
+    font-size: 12px;
+    max-width: 420px;
+  }
+  .hero.hero-horizon .hero-eyebrow {
+    font-size: 7px;
+    letter-spacing: 1px;
+    padding: 6px 9px;
+  }
+  .horizon-rim {
+    width: 190%;
+    left: -45%;
+    top: -598px;
+  }
+  .hero-actions {
+    gap: 9px;
+    margin-top: 23px;
+  }
+  .hero .liquid-button,
+  .hero-library-link {
+    font-size: 12px;
+    padding: 11px 16px;
+    min-height: 46px;
+  }
+  .hero.hero-horizon .hero-signature {
+    font-size: 7px;
+    letter-spacing: 1.8px;
+    gap: 8px;
+  }
+}
+@media (max-width: 440px) {
+  .hero-actions {
+    width: 100%;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .hero .liquid-button,
+  .hero-library-link {
+    width: 100%;
+    max-width: 250px;
+  }
+  .hero.hero-horizon .hero-eyebrow {
+    max-width: 245px;
+  }
+  .hero.hero-horizon {
+    padding-inline: 20px;
+  }
+  .hero-frame-corners {
+    inset: 9px;
+  }
+}

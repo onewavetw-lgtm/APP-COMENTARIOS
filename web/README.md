@@ -315,3 +315,21 @@ Validação: TypeScript/build; navegador com API simulada conferindo curvas,
 acompanhamento local, saída do banner pausando animação, controles/cópia, 429 com
 pausa/retomada, onda de progresso, JSON completo, biblioteca e menu/mobile.
 Nenhuma chamada ao YouTube é realizada pelos efeitos ou pelos testes.
+
+
+## Hero com horizonte e vidro
+
+`ResearchHero` adapta as referências de Glow Horizon e liquid glass à aplicação:
+arco de luz violeta, título central maior, moldura, linhas existentes e CTA de vidro.
+As referências recebidas eram trechos de demonstração, sem implementações dos
+imports; foi criada uma composição própria em CSS/SVG, sem vídeo remoto ou contexto
+WebGL permanente. Logo, Poppins, frase e STAY CURIOUS permanecem.
+
+“Começar pesquisa” navega ao formulário e foca o tema, sem iniciar chamadas. Durante
+uma coleta, muda para “Ver coleta em andamento” e leva aos resultados. “Abrir
+biblioteca” é um link funcional. Não há badge fictício de disponibilidade de projetos.
+As animações respeitam movimento reduzido e a hero não ocupa uma tela inteira.
+
+Build e navegador conferidos: botões/foco/biblioteca, desktop e 320/390px sem overflow,
+temas e movimento reduzido; regressão de coleta simulada, 429, cópia, checks, progresso
+e download JSON íntegro passou. Prévia gerada localmente antes da publicação.

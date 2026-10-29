@@ -8,6 +8,7 @@ import "./themes.css";
 import "./interactions.css";
 import "./sidebar-nav.css";
 import "./ambient-effects.css";
+import "./research-hero.css";
 import MotionEffects from "@/components/motion-effects";
 export const metadata: Metadata = {
   title: "LowWave · Pesquisa de público",
