@@ -28,7 +28,7 @@ function download(name: string, text: string, type: string) {
 }
 export default function Home() {
   const [key, setKey] = useState(""),
-    [terms, setTerms] = useState("motobomba a gasolina"),
+    [terms, setTerms] = useState(""),
     [links, setLinks] = useState(""),
     [onlyLinks, setOnlyLinks] = useState(false);
   const [pages, setPages] = useState(1),
@@ -59,7 +59,6 @@ export default function Home() {
         setJob(saved);
         if (saved) {
           await archiveLegacyJob(saved);
-          setTerms(saved.settings.terms.join("\n"));
           setLinks(
             saved.settings.links
               .map((id) => `https://www.youtube.com/watch?v=${id}`)
@@ -370,6 +369,7 @@ export default function Home() {
                 Tema ou buscas — uma por linha
                 <textarea
                   value={terms}
+                  placeholder="Digite o tema que você quer pesquisar"
                   onChange={(e) => setTerms(e.target.value)}
                   disabled={busy}
                   rows={5}
