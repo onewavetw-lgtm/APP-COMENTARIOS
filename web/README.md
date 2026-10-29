@@ -243,3 +243,8 @@ A versão Photoroom transparente substitui a anterior com fundo. O arquivo é id
 ao enviado (RGBA, 2172×724), e a base/borda escura do menu foi removida. Favicon do
 menino preservado. Build e navegador (temas, duas páginas, leitura no claro, mobile,
 resposta do PNG conferida por SHA-256) aprovados.
+
+O subtítulo “PESQUISA DE PÚBLICO” foi retirado da exibição da logo por enquadramento
+CSS apenas na região inferior das letras. O menino e o nome permanecem completos,
+o PNG original é preservado e o texto alternativo da marca agora é “LowWave”.
+Build e conferência visual nos dois temas/páginas/mobile aprovados.

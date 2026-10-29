@@ -301,6 +301,8 @@ blockquote,
   left: -18%;
   top: 50%;
   transform: translateY(-50%);
+  /* Hide only the tagline beneath the wordmark, preserving the full mascot. */
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 33% 60%, 33% 100%, 0 100%);
 }
 
 /* Keep the manifesto distinct while giving the working area more space. */
@@ -348,7 +350,7 @@ blockquote,
 }
 :root[data-theme="light"] .brand-frame .brand-wordmark-contrast {
   display: block;
-  clip-path: inset(0 0 0 33%);
+  clip-path: polygon(33% 0, 100% 0, 100% 60%, 33% 60%);
   filter: brightness(0);
   opacity: 0.85;
 }
