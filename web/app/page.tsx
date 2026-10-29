@@ -1,4 +1,5 @@
 "use client";
+import NavItem from "@/components/nav-item";
 import Icon, { type IconName } from "@/components/icon";
 import Sidebar from "@/components/sidebar";
 import Accordion from "@/components/accordion";
@@ -313,7 +314,8 @@ export default function Home() {
               ["export", "Exportar pesquisa", "download"],
             ] as [string, string, IconName][]
           ).map(([target, label, icon]) => (
-            <a
+            <NavItem
+              icon={icon}
               key={target}
               href={`#${target}`}
               aria-current={section === target ? "location" : undefined}
@@ -322,14 +324,12 @@ export default function Home() {
                 navigate(target);
               }}
             >
-              <Icon name={icon} />
               {label}
-            </a>
+            </NavItem>
           ))}
-          <a href="/biblioteca">
-            <Icon name="library" />
+          <NavItem href="/biblioteca" icon="library">
             Biblioteca de pesquisas
-          </a>
+          </NavItem>
           <small className="nav-group">AJUSTES</small>
           {(
             [
@@ -337,7 +337,8 @@ export default function Home() {
               ["prompts", "Prompt para o ChatGPT", "prompt"],
             ] as [string, string, IconName][]
           ).map(([target, label, icon]) => (
-            <a
+            <NavItem
+              icon={icon}
               key={target}
               href={`#${target}`}
               aria-current={section === target ? "location" : undefined}
@@ -346,9 +347,8 @@ export default function Home() {
                 navigate(target);
               }}
             >
-              <Icon name={icon} />
               {label}
-            </a>
+            </NavItem>
           ))}
         </nav>
         <label className="key">

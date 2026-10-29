@@ -278,3 +278,17 @@ clipboard real e negado, 429 com pausa/relógio/retomada sem repetir páginas pr
 onda indeterminada→50%→100%, checks, conferência manual, JSON completo e íntegro,
 biblioteca, drawer/Escape/teclado/mobile e movimento reduzido. Nenhuma consulta
 real ao YouTube foi usada nos testes.
+
+
+## Barra lateral com cores e movimento
+
+O componente `NavItem` compartilha ícones em pequenos blocos coloridos: pesquisa
+violeta, fontes ciano, exportação verde, biblioteca dourado, filtros rosa e prompt
+azul. Tons próprios do tema claro mantêm contraste. O estado ativo usa faixa lateral,
+seta e brilho curto; hover/foco movimentam os ícones sem loops contínuos. Cabeçalhos
+com divisores e estados de teclado seguem a referência visual enviada. Nenhum
+script, serviço externo ou conteúdo comercial da referência foi incorporado.
+
+Build e navegador conferidos: seis cores distintas nos dois temas, seleção exclusiva,
+navegação/acordeões, biblioteca, hover, drawer/teclado/mobile e redução de movimento.
+Esses efeitos não fazem consultas ao YouTube e não alteram o fluxo ou os dados.

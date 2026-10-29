@@ -1,0 +1,288 @@
+/* Colored wayfinding inspired by the reference; the LowWave violet identity stays intact. */
+.sidebar nav {
+  gap: 7px;
+}
+.sidebar nav .nav-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 17px 8px 6px;
+  font-size: 9px;
+  letter-spacing: 1.8px;
+  color: var(--text-small);
+}
+.sidebar nav .nav-group::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--surface-border);
+  opacity: 0.6;
+}
+.sidebar nav .nav-item {
+  --item-accent: #ba98ff;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 49px;
+  padding: 8px 9px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.55;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+}
+.sidebar nav .nav-item[data-accent="search"] {
+  --item-accent: #bd9aff;
+}
+.sidebar nav .nav-item[data-accent="eye"] {
+  --item-accent: #6bdded;
+}
+.sidebar nav .nav-item[data-accent="download"] {
+  --item-accent: #80e4ad;
+}
+.sidebar nav .nav-item[data-accent="library"] {
+  --item-accent: #f0c879;
+}
+.sidebar nav .nav-item[data-accent="filter"] {
+  --item-accent: #f29bc6;
+}
+.sidebar nav .nav-item[data-accent="prompt"] {
+  --item-accent: #91b7ff;
+}
+.sidebar nav .nav-label {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  transition: transform 0.2s;
+}
+.sidebar nav .nav-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: var(--item-accent);
+  background: color-mix(in srgb, var(--item-accent) 11%, transparent);
+  border: 1px solid color-mix(in srgb, var(--item-accent) 16%, transparent);
+  transition:
+    transform 0.22s,
+    background 0.22s,
+    border-color 0.22s,
+    box-shadow 0.22s;
+}
+.sidebar nav .nav-icon svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.22s;
+}
+.sidebar nav .nav-direction {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  flex: 0 0 12px;
+  color: var(--item-accent);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+.sidebar nav .nav-direction svg {
+  width: 12px;
+  height: 12px;
+}
+.sidebar nav .nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 21px;
+  width: 2px;
+  background: var(--item-accent);
+  border-radius: 3px;
+  transform: translateY(-50%) scaleY(0);
+  transition: transform 0.22s;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--item-accent) 45%, transparent);
+}
+.sidebar nav .nav-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    color-mix(in srgb, var(--item-accent) 12%, transparent) 48%,
+    transparent 76%
+  );
+  background-size: 240% 100%;
+}
+.sidebar nav .nav-item:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--item-accent) 5%, transparent);
+  border-color: color-mix(in srgb, var(--item-accent) 18%, transparent);
+  color: var(--text-main);
+}
+.sidebar nav .nav-item:focus-visible {
+  outline: 2px solid var(--item-accent);
+  outline-offset: 3px;
+}
+.sidebar nav .nav-item:is(:hover, :focus-visible) .nav-icon {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--item-accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--item-accent) 35%, transparent);
+  box-shadow: 0 3px 17px color-mix(in srgb, var(--item-accent) 9%, transparent);
+}
+.sidebar nav .nav-item:is(:hover, :focus-visible) .nav-label {
+  transform: translateX(1px);
+}
+.sidebar nav .nav-item:is(:hover, :focus-visible) .nav-direction,
+.sidebar nav .nav-item[aria-current="location"] .nav-direction {
+  opacity: 1;
+  transform: translateX(0);
+}
+.sidebar nav .nav-item[aria-current="location"] {
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--item-accent) 11%, transparent),
+    color-mix(in srgb, var(--item-accent) 3%, transparent)
+  );
+  border-color: color-mix(in srgb, var(--item-accent) 25%, transparent);
+  color: var(--text-main);
+  box-shadow: none;
+}
+.sidebar nav .nav-item[aria-current="location"]::before {
+  transform: translateY(-50%) scaleY(1);
+}
+.sidebar nav .nav-item[aria-current="location"]::after {
+  animation: nav-select-sheen 0.6s ease-out;
+}
+.sidebar nav .nav-item[aria-current="location"] .nav-icon {
+  background: color-mix(in srgb, var(--item-accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--item-accent) 30%, transparent);
+}
+.sidebar
+  nav
+  .nav-item:is(:hover, :focus-visible)[data-accent="search"]
+  .nav-icon
+  svg {
+  transform: rotate(-9deg) scale(1.06);
+}
+.sidebar
+  nav
+  .nav-item:is(:hover, :focus-visible)[data-accent="eye"]
+  .nav-icon
+  svg {
+  transform: scale(1.12);
+}
+.sidebar
+  nav
+  .nav-item:is(:hover, :focus-visible)[data-accent="download"]
+  .nav-icon
+  svg {
+  animation: nav-download 0.5s ease-out;
+}
+.sidebar
+  nav
+  .nav-item:is(:hover, :focus-visible)[data-accent="library"]
+  .nav-icon
+  svg {
+  animation: nav-book 0.5s ease-out;
+}
+.sidebar
+  nav
+  .nav-item:is(:hover, :focus-visible)[data-accent="filter"]
+  .nav-icon
+  svg {
+  transform: rotate(180deg);
+}
+.sidebar
+  nav
+  .nav-item:is(:hover, :focus-visible)[data-accent="prompt"]
+  .nav-icon
+  svg {
+  transform: translateY(-1px) rotate(5deg);
+}
+@keyframes nav-select-sheen {
+  0% {
+    opacity: 0;
+    background-position: 100% 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    background-position: -100% 0;
+  }
+}
+@keyframes nav-download {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(2px);
+  }
+  70% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes nav-book {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  35% {
+    transform: rotate(-7deg);
+  }
+  70% {
+    transform: rotate(5deg);
+  }
+}
+:root[data-theme="light"] .sidebar nav .nav-item[data-accent="search"] {
+  --item-accent: #7642ba;
+}
+:root[data-theme="light"] .sidebar nav .nav-item[data-accent="eye"] {
+  --item-accent: #08758c;
+}
+:root[data-theme="light"] .sidebar nav .nav-item[data-accent="download"] {
+  --item-accent: #19734b;
+}
+:root[data-theme="light"] .sidebar nav .nav-item[data-accent="library"] {
+  --item-accent: #93600d;
+}
+:root[data-theme="light"] .sidebar nav .nav-item[data-accent="filter"] {
+  --item-accent: #ad3c74;
+}
+:root[data-theme="light"] .sidebar nav .nav-item[data-accent="prompt"] {
+  --item-accent: #3564bb;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar nav .nav-item .nav-label,
+  .sidebar nav .nav-item .nav-icon,
+  .sidebar nav .nav-item .nav-icon svg,
+  .sidebar nav .nav-item .nav-direction {
+    transform: none !important;
+  }
+  .sidebar nav .nav-item::after {
+    animation: none !important;
+  }
+}

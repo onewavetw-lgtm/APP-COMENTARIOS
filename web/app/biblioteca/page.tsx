@@ -1,5 +1,5 @@
 "use client";
-import Icon from "@/components/icon";
+import NavItem from "@/components/nav-item";
 import Sidebar from "@/components/sidebar";
 import Accordion from "@/components/accordion";
 import CopyButton from "@/components/copy-button";
@@ -208,13 +208,13 @@ export default function Library() {
       <Sidebar>
         <Brand />
         <nav>
-          <a href="/">
-            <Icon name="search" />
+          <small className="nav-group">PESQUISAS</small>
+          <NavItem href="/" icon="search">
             Nova pesquisa
-          </a>
-          <a href="/biblioteca" aria-current="location">
-            <Icon name="library" /> Biblioteca
-          </a>
+          </NavItem>
+          <NavItem href="/biblioteca" icon="library" aria-current="location">
+            Biblioteca
+          </NavItem>
         </nav>
         <p>
           Dados salvos neste navegador. Consultar, anotar e exportar não consome

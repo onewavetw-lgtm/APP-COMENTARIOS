@@ -6,6 +6,7 @@ import "@fontsource/poppins/700.css";
 import "./globals.css";
 import "./themes.css";
 import "./interactions.css";
+import "./sidebar-nav.css";
 import MotionEffects from "@/components/motion-effects";
 export const metadata: Metadata = {
   title: "LowWave · Pesquisa de público",
