@@ -1,28 +1,27 @@
-/* Brand purple #5F28C0 anchors the dark gradient; light keeps soft lavender. */
+/* Midnight blue work surfaces with selective violet brand accents. */
 :root {
-  --page-bg: #32145f;
+  --page-bg: #14202e;
   --page-background:
-    radial-gradient(ellipse at 88% 8%, #8951ee30, transparent 52%),
-    radial-gradient(ellipse at 0% 90%, #4a16a550, transparent 60%),
-    linear-gradient(135deg, #21103e 0%, #371561 52%, #5f28c0 100%);
-  --page-glow: #5f28c028;
-  --panel-bg: #24113f;
-  --panel-top: #351963;
-  --sidebar-bg: #1b0c33;
-  --sidebar-top: #291248;
-  --field-bg: #1c0d34;
-  --stat-bg: #3b1c68;
-  --surface-border: #c59aef42;
-  --text-main: #f2edf9;
-  --text-muted: #d1c2e8;
-  --text-label: #e3d5f5;
-  --text-small: #d0bce7;
-  --text-link: #e0caff;
-  --button-bg: #48217c;
-  --button-hover: #5a2b95;
-  --button-text: #eee4ff;
-  --focus: #c7a0ff;
-  --shadow: #14052f45;
+    radial-gradient(ellipse at 90% 0%, #7956c710, transparent 48%),
+    linear-gradient(180deg, #14202e, #101a27);
+  --page-glow: #7956c710;
+  --panel-bg: #1a2533;
+  --panel-top: #1d2b3b;
+  --sidebar-bg: #0c1520;
+  --sidebar-top: #101b29;
+  --field-bg: #111c29;
+  --stat-bg: #233347;
+  --surface-border: #384b625e;
+  --text-main: #f4f7fc;
+  --text-muted: #b5c2d3;
+  --text-label: #d4deec;
+  --text-small: #adbbce;
+  --text-link: #cbbaff;
+  --button-bg: #28374b;
+  --button-hover: #34465e;
+  --button-text: #edf1fc;
+  --focus: #b79aff;
+  --shadow: #040b152e;
   --violet-border: var(--surface-border);
   background: var(--page-bg);
   color: var(--text-main);
@@ -96,8 +95,9 @@ nav a:hover {
 }
 nav a[aria-current="location"] {
   color: var(--text-main);
-  background: linear-gradient(110deg, #8544df52, #5f28c028);
-  border-color: var(--surface-border);
+  background: linear-gradient(110deg, #9163e326, #9163e30a);
+  border-color: #a58ade38;
+  box-shadow: inset 2px 0 #ad89ff;
 }
 .card {
   background: linear-gradient(145deg, var(--panel-top), var(--panel-bg));
@@ -296,4 +296,43 @@ blockquote,
   left: -18%;
   top: 50%;
   transform: translateY(-50%);
+}
+
+/* Keep the manifesto distinct while giving the working area more space. */
+.hero {
+  min-height: 310px;
+  padding: 36px 40px;
+}
+.hero h1 {
+  font-size: clamp(29px, 3.1vw, 46px);
+  margin: 22px 0 16px;
+  letter-spacing: -2px;
+}
+.hero-signature {
+  margin-top: 22px;
+}
+:root:not([data-theme="light"]) .hero {
+  border-color: #5e557c48;
+  background: #0d1421;
+}
+:root:not([data-theme="light"]) .hero-aura {
+  opacity: 0.83;
+}
+.card:hover {
+  border-color: var(--focus);
+  box-shadow: 0 10px 32px -25px #070e1c66;
+}
+.pill {
+  font-size: 8px;
+  letter-spacing: 1.1px;
+}
+@media (max-width: 850px) {
+  .hero {
+    min-height: 300px;
+    padding: 28px 24px;
+  }
+  .hero h1 {
+    font-size: clamp(29px, 5.5vw, 42px);
+    letter-spacing: -1.5px;
+  }
 }
