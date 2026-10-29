@@ -261,3 +261,32 @@ blockquote,
     gap: 8px;
   }
 }
+
+/* Original supplied artwork is framed with CSS; source PNGs stay unchanged. */
+.brand--art {
+  display: block;
+  width: 100%;
+  max-width: 250px;
+  padding: 9px 8px;
+  border-radius: 12px;
+  background: #070f18;
+  border: 1px solid #b994ff20;
+  line-height: 0;
+}
+.brand-frame {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4.35;
+  overflow: hidden;
+}
+.brand-frame img {
+  display: block;
+  position: absolute;
+  width: 132%;
+  max-width: none;
+  height: auto;
+  left: -18%;
+  top: 50%;
+  transform: translateY(-50%);
+}

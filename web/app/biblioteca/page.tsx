@@ -1,4 +1,5 @@
 "use client";
+import Brand from "@/components/brand";
 import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -189,9 +190,7 @@ export default function Library() {
   return (
     <div className="shell">
       <aside>
-        <a className="brand" href="/">
-          ≋ LowWave<span className="cyan">.</span>
-        </a>
+        <Brand />
         <nav>
           <a href="/">◎ Nova pesquisa</a>
           <a href="/biblioteca" aria-current="location">

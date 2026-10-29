@@ -201,3 +201,15 @@ sincronizada entre abas por evento de armazenamento. Se salvar falhar, o tema mu
 na página e o botão informa que não foi possível guardar a preferência. Não modifica
 pesquisas nem faz chamadas ao YouTube. Build e navegador (alternância, recarga,
 biblioteca, teclado e mobile nos dois temas, sem erros de hidratação) conferidos.
+
+
+## Identidade visual fornecida pelo usuário
+
+`public/brand/lowwave-logo.png` e `lowwave-boy.png` são os PNG originais recebidos
+no ZIP, preservados byte a byte. O componente `Brand` usa a logo completa nas duas
+páginas, com enquadramento CSS para as margens e base escura para manter a leitura
+no tema claro. Next Image entrega a imagem dimensionada ao navegador.
+
+O menino é declarado nos metadados como ícone PNG da aba, atalho e Apple touch icon.
+Build e navegador conferiram logo nas duas páginas, resposta do favicon com hash
+igual ao original, temas e mobile sem rolagem horizontal indevida.

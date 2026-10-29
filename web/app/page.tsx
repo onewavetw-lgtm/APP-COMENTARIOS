@@ -1,4 +1,5 @@
 "use client";
+import Brand from "@/components/brand";
 import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -270,13 +271,7 @@ export default function Home() {
   return (
     <div className="shell">
       <aside>
-        <a className="brand" href="#search">
-          <b>≋</b>
-          <span>
-            LowWave<span className="cyan">.</span>
-            <small>PESQUISA DE PÚBLICO</small>
-          </span>
-        </a>
+        <Brand href="#search" />
         <nav>
           <a href="/biblioteca">▤ Biblioteca de pesquisas</a>
           {[

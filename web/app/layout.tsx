@@ -8,6 +8,13 @@ import "./themes.css";
 import MotionEffects from "@/components/motion-effects";
 export const metadata: Metadata = {
   title: "LowWave · Pesquisa de público",
+  icons: {
+    icon: [
+      { url: "/brand/lowwave-boy.png", type: "image/png", sizes: "1254x1254" },
+    ],
+    shortcut: "/brand/lowwave-boy.png",
+    apple: "/brand/lowwave-boy.png",
+  },
   description:
     "Comentários reais, fontes verificáveis e exportação para análise.",
 };
