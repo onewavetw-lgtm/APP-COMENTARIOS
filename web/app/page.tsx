@@ -1,4 +1,13 @@
 "use client";
+import Icon, { type IconName } from "@/components/icon";
+import Sidebar from "@/components/sidebar";
+import Accordion from "@/components/accordion";
+import CopyButton from "@/components/copy-button";
+import CollectionProgress, {
+  RetryCountdown,
+  useCountdown,
+} from "@/components/collection-progress";
+import { waitUntil } from "@/lib/presentation";
 import Brand from "@/components/brand";
 import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useRef, useState } from "react";
@@ -18,7 +27,7 @@ import { archiveLegacyJob } from "@/lib/library";
 import QuotaMeter, { QuotaMeterHandle } from "@/components/quota-meter";
 import type { QuotaAction } from "@/lib/quota";
 import { DEFAULT_PROMPT } from "@/lib/defaults";
-function download(name: string, text: string, type: string) {
+function downloadFile(name: string, text: string, type: string) {
   const url = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement("a");
   a.href = url;
@@ -49,7 +58,21 @@ export default function Home() {
     [ready, setReady] = useState(false),
     [message, setMessage] = useState(""),
     [tab, setTab] = useState("sources"),
-    [cooldown, setCooldown] = useState(0);
+    [cooldownUntil, setCooldownUntil] = useState(0),
+    [retryUntil, setRetryUntil] = useState(0),
+    [reviewedId, setReviewedId] = useState<string | null>(null),
+    [exportedId, setExportedId] = useState<string | null>(null);
+  const cooldown = useCountdown(cooldownUntil),
+    retryLeft = useCountdown(retryUntil);
+  function download(name: string, text: string, type: string) {
+    try {
+      downloadFile(name, text, type);
+      setMessage(`Download iniciado: ${name}`);
+      if (name.endsWith(".json")) setExportedId(job?.id ?? null);
+    } catch {
+      setMessage("Não foi possível iniciar o download. Tente novamente.");
+    }
+  }
   const quotaMeter = useRef<QuotaMeterHandle>(null);
   const active = useRef(false),
     controller = useRef<AbortController | null>(null);
@@ -84,14 +107,6 @@ export default function Home() {
       controller.current?.abort();
     };
   }, []);
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const timer = setInterval(
-      () => setCooldown((n) => Math.max(0, n - 1)),
-      1000,
-    );
-    return () => clearInterval(timer);
-  }, [cooldown]);
   async function run(initial: Job) {
     if (active.current) return;
     active.current = true;
@@ -102,6 +117,7 @@ export default function Home() {
     try {
       await saveJob(current);
       setJob(current);
+      navigate("results");
       const api = async (
         params: Record<string, unknown>,
       ): Promise<YouTubeData> => {
@@ -128,16 +144,22 @@ export default function Home() {
             (data.retryAfter ?? 30) <= 60
           ) {
             const wait = Math.max(data.retryAfter ?? 30, 2 ** (attempt + 1));
-            setMessage(
-              `Limite temporário: aguardando ${wait}s para repetir somente esta página.`,
-            );
-            for (let second = 0; second < wait; second++) {
-              await new Promise((r) => setTimeout(r, 1000));
-              if (!active.current) throw new Error("Pesquisa pausada.");
+            const deadline = Date.now() + wait * 1000;
+            setRetryUntil(deadline);
+            setMessage("Limite temporário do YouTube. O progresso está salvo.");
+            try {
+              await waitUntil(deadline, controller.current!.signal);
+            } finally {
+              if (controller.current!.signal.aborted && deadline > Date.now())
+                setCooldownUntil(deadline);
+              setRetryUntil(0);
             }
             continue;
           }
-          if (response.status === 429) setCooldown(data.retryAfter ?? 30);
+          if (response.status === 429)
+            setCooldownUntil(
+              Date.now() + Math.max(1, data.retryAfter ?? 30) * 1000,
+            );
           throw new RequestError(
             data.error ?? "Falha na consulta.",
             response.status,
@@ -165,6 +187,7 @@ export default function Home() {
     } finally {
       active.current = false;
       setBusy(false);
+      setRetryUntil(0);
     }
   }
   function start() {
@@ -266,37 +289,64 @@ export default function Home() {
   }
   const selected = job ? filteredRows(job) : [];
   const stage =
-    job?.phase === "search"
-      ? `Buscando tema ${job.term + 1}/${job.settings.terms.length}, página ${job.page + 1}`
-      : job?.phase === "details"
-        ? "Conferindo os vídeos encontrados"
-        : job?.phase === "comments"
-          ? `Lendo vídeo ${job.video + 1}/${job.selected.length}`
-          : job
-            ? "Coleta concluída"
-            : "Pronto para começar";
+    job && job.phase !== "done" && !busy
+      ? "Coleta pausada"
+      : job?.phase === "search"
+        ? `Buscando tema ${job.term + 1}/${job.settings.terms.length}, página ${job.page + 1}`
+        : job?.phase === "details"
+          ? "Conferindo os vídeos encontrados"
+          : job?.phase === "comments"
+            ? `Lendo vídeo ${job.video + 1}/${job.selected.length}`
+            : job
+              ? "Coleta concluída"
+              : "Pronto para começar";
   return (
     <div className="shell">
-      <aside>
+      <Sidebar>
         <Brand href="#search" />
-        <nav>
-          <a href="/biblioteca">▤ Biblioteca de pesquisas</a>
-          {[
-            ["search", "◎ Nova pesquisa"],
-            ["results", "▤ Resultados e fontes"],
-            ["filters", "◇ Palavras de dor e filtros"],
-            ["prompts", "✎ Prompt para o ChatGPT"],
-            ["export", "↗ Exportar pesquisa"],
-          ].map(([target, label]) => (
+        <nav aria-label="Navegação da pesquisa">
+          <small className="nav-group">PESQUISA</small>
+          {(
+            [
+              ["search", "Nova pesquisa", "search"],
+              ["results", "Resultados e fontes", "eye"],
+              ["export", "Exportar pesquisa", "download"],
+            ] as [string, string, IconName][]
+          ).map(([target, label, icon]) => (
             <a
               key={target}
               href={`#${target}`}
               aria-current={section === target ? "location" : undefined}
-              onClick={(event) => {
-                event.preventDefault();
+              onClick={(e) => {
+                e.preventDefault();
                 navigate(target);
               }}
             >
+              <Icon name={icon} />
+              {label}
+            </a>
+          ))}
+          <a href="/biblioteca">
+            <Icon name="library" />
+            Biblioteca de pesquisas
+          </a>
+          <small className="nav-group">AJUSTES</small>
+          {(
+            [
+              ["filters", "Palavras de dor e filtros", "filter"],
+              ["prompts", "Prompt para o ChatGPT", "prompt"],
+            ] as [string, string, IconName][]
+          ).map(([target, label, icon]) => (
+            <a
+              key={target}
+              href={`#${target}`}
+              aria-current={section === target ? "location" : undefined}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(target);
+              }}
+            >
+              <Icon name={icon} />
               {label}
             </a>
           ))}
@@ -326,9 +376,9 @@ export default function Home() {
         <footer>
           LOWWAVE / VERSÃO WEB
           <br />
-          Em desenvolvimento para Vercel
+          Seu espaço de pesquisa
         </footer>
-      </aside>
+      </Sidebar>
       <main>
         <header>
           <span>Seu espaço / Pesquisa de público</span>
@@ -361,9 +411,64 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <div className="steps">
-          01 Pesquisar <i /> 02 Conferir fontes <i /> 03 Levar para análise
-        </div>
+        <nav className="workflow-steps" aria-label="Etapas da pesquisa">
+          {[
+            {
+              id: "search",
+              label: "Pesquisar",
+              hint:
+                job?.phase === "done"
+                  ? "Coleta encerrada"
+                  : busy
+                    ? "Coleta em andamento"
+                    : job
+                      ? "Coleta pausada"
+                      : "Comece por aqui",
+              done: job?.phase === "done",
+            },
+            {
+              id: "results",
+              label: "Conferir fontes",
+              hint:
+                reviewedId === job?.id
+                  ? "Fontes conferidas"
+                  : job?.selected.length
+                    ? "Fontes disponíveis"
+                    : "Aguardando coleta",
+              done: !!job && reviewedId === job.id,
+            },
+            {
+              id: "export",
+              label: "Exportar",
+              hint:
+                exportedId === job?.id
+                  ? "Download iniciado"
+                  : job?.rows.length
+                    ? "Arquivo disponível"
+                    : "Aguardando comentários",
+              done: !!job && exportedId === job.id,
+            },
+          ].map((step, index) => (
+            <button
+              key={step.id}
+              className={section === step.id ? "is-current" : ""}
+              aria-current={section === step.id ? "step" : undefined}
+              onClick={() => {
+                if (step.id === "results") setTab("sources");
+                navigate(step.id);
+              }}
+            >
+              <span className={`workflow-number ${step.done ? "is-done" : ""}`}>
+                {step.done ? <Icon name="check" /> : `0${index + 1}`}
+              </span>
+              <span>
+                <strong>{step.label}</strong>
+                <small>{step.hint}</small>
+              </span>
+              <Icon name="arrow" />
+            </button>
+          ))}
+        </nav>
         <div id="search" className="grid" tabIndex={-1}>
           <section>
             <div className="card">
@@ -384,7 +489,7 @@ export default function Home() {
                 />
               </label>
             </div>
-            <details>
+            <Accordion>
               <summary>Ajustar coleta e filtros</summary>
               <fieldset disabled={busy}>
                 <div className="controls">
@@ -439,8 +544,8 @@ export default function Home() {
                   não um filtro estrito de idioma.
                 </p>
               </fieldset>
-            </details>
-            <details id="filters" tabIndex={-1}>
+            </Accordion>
+            <Accordion id="filters" tabIndex={-1}>
               <summary>Palavras de dor e filtros do texto</summary>
               <fieldset disabled={busy}>
                 <div className="controls">
@@ -501,8 +606,8 @@ export default function Home() {
                   </button>
                 )}
               </fieldset>
-            </details>
-            <details id="prompts" tabIndex={-1}>
+            </Accordion>
+            <Accordion id="prompts" tabIndex={-1}>
               <summary>Orientação para a análise no ChatGPT</summary>
               <fieldset disabled={busy}>
                 <p>
@@ -530,6 +635,7 @@ export default function Home() {
                   pesquisados.
                 </p>
                 <div className="actions">
+                  <CopyButton text={prompt} label="Copiar prompt" />
                   <button onClick={() => setPrompt(DEFAULT_PROMPT)}>
                     Restaurar prompt padrão
                   </button>
@@ -540,8 +646,8 @@ export default function Home() {
                   )}
                 </div>
               </fieldset>
-            </details>
-            <details>
+            </Accordion>
+            <Accordion>
               <summary>Incluir vídeos específicos por link</summary>
               <label>
                 Um link por linha
@@ -566,13 +672,13 @@ export default function Home() {
                 comentários. Vídeos privados ou com comentários desativados
                 podem não ser coletados.
               </p>
-            </details>
+            </Accordion>
             <button
               className="primary full"
               onClick={start}
               disabled={!ready || busy || cooldown > 0}
             >
-              ⌕ Iniciar nova coleta
+              <Icon name="search" /> Iniciar nova coleta
             </button>
           </section>
           <section>
@@ -600,14 +706,23 @@ export default function Home() {
             {message}
           </div>
         )}
-        {cooldown > 0 && <p>Nova tentativa disponível em {cooldown}s.</p>}
+        {(retryLeft > 0 || cooldown > 0) && (
+          <RetryCountdown
+            seconds={retryLeft || cooldown}
+            automatic={retryLeft > 0}
+          />
+        )}
         <section id="results" tabIndex={-1}>
           {job ? (
             <>
               <div className="sectionTitle">
                 <div>
                   <small>SUA PESQUISA</small>
-                  <h2>{stage}</h2>
+                  <h2>
+                    {retryLeft > 0 || cooldown > 0
+                      ? "Aguardando o YouTube"
+                      : stage}
+                  </h2>
                 </div>
                 <div className="actions">
                   {busy ? (
@@ -617,7 +732,7 @@ export default function Home() {
                         controller.current?.abort();
                       }}
                     >
-                      Pausar
+                      <Icon name="pause" /> Pausar
                     </button>
                   ) : (
                     job.phase !== "done" && (
@@ -625,7 +740,7 @@ export default function Home() {
                         disabled={!key.trim() || cooldown > 0}
                         onClick={() => void run(job)}
                       >
-                        Continuar coleta
+                        <Icon name="play" /> Continuar coleta
                       </button>
                     )
                   )}
@@ -665,12 +780,10 @@ export default function Home() {
                   <strong>{selected.length}</strong>selecionados para texto
                 </div>
               </div>
-              <progress
-                aria-label="Progresso dos vídeos"
-                value={job.phase === "done" ? 1 : job.video}
-                max={
-                  job.phase === "done" ? 1 : Math.max(1, job.selected.length)
-                }
+              <CollectionProgress
+                job={job}
+                running={busy}
+                waiting={retryLeft > 0 || cooldown > 0}
               />
               <div className="tabs">
                 <button
@@ -686,59 +799,130 @@ export default function Home() {
                   Comentários selecionados
                 </button>
               </div>
-              {tab === "sources" ? (
-                <div className="table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Vídeo</th>
-                        <th>Visualizações</th>
-                        <th>Baixados</th>
-                        <th>Fonte</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {job.selected.map((v) => (
-                        <tr key={v.id}>
-                          <td>
-                            {v.title}
-                            <small>{v.channel}</small>
-                          </td>
-                          <td>{v.views.toLocaleString("pt-BR")}</td>
-                          <td>
-                            {job.rows.filter((r) => r.id_video === v.id).length}
-                          </td>
-                          <td>
-                            <a href={v.url} target="_blank" rel="noreferrer">
-                              Abrir vídeo ↗
-                            </a>
-                          </td>
+              <div className="tab-panel" key={tab}>
+                {tab === "sources" ? (
+                  <div className="table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Vídeo</th>
+                          <th>Visualizações</th>
+                          <th>Baixados</th>
+                          <th>Leitura</th>
+                          <th>Fonte</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {!job.selected.length && (
-                    <p>
-                      A seleção aparecerá após conferir os resultados da busca.
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="comments">
-                  {selected.slice(0, 100).map((r, i) => (
-                    <blockquote key={i}>
-                      <strong>{r.autor || "Autor não informado"}</strong>
-                      <p>{r.comentario}</p>
-                      <small>
-                        {r.video} · {r.curtidas} curtidas
-                      </small>
-                    </blockquote>
-                  ))}
-                  {selected.length > 100 && (
-                    <p>Prévia dos primeiros 100. A exportação inclui todos.</p>
-                  )}
-                </div>
-              )}
+                      </thead>
+                      <tbody>
+                        {busy &&
+                          !job.selected.length &&
+                          Array.from({ length: 3 }, (_, i) => (
+                            <tr
+                              className="skeleton-row"
+                              key={`loading-${i}`}
+                              aria-hidden="true"
+                            >
+                              <td colSpan={5}>
+                                <span className="loading-line" />
+                              </td>
+                            </tr>
+                          ))}
+                        {job.selected.map((v, index) => (
+                          <tr key={v.id}>
+                            <td>
+                              {v.title}
+                              <small>{v.channel}</small>
+                            </td>
+                            <td>{v.views.toLocaleString("pt-BR")}</td>
+                            <td>
+                              {
+                                job.rows.filter((r) => r.id_video === v.id)
+                                  .length
+                              }
+                            </td>
+                            <td>
+                              <span
+                                className={`video-read-state ${index < job.video ? "is-done" : busy && job.phase === "comments" && index === job.video && !retryLeft ? "is-reading" : ""}`}
+                              >
+                                {index < job.video ? (
+                                  <>
+                                    <Icon name="check" />
+                                    Processado
+                                  </>
+                                ) : busy &&
+                                  job.phase === "comments" &&
+                                  index === job.video &&
+                                  !retryLeft ? (
+                                  <>
+                                    <span className="loading-line" />
+                                    Lendo comentários
+                                  </>
+                                ) : index === job.video &&
+                                  job.phase === "comments" ? (
+                                  retryLeft ? (
+                                    "Aguardando YouTube"
+                                  ) : (
+                                    "Pausado"
+                                  )
+                                ) : (
+                                  "Na fila"
+                                )}
+                              </span>
+                            </td>
+                            <td>
+                              <a href={v.url} target="_blank" rel="noreferrer">
+                                Abrir vídeo <Icon name="link" />
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {job.phase === "done" && job.selected.length > 0 && (
+                      <button
+                        className="review-button"
+                        onClick={() => {
+                          setReviewedId(job.id);
+                          setMessage(
+                            "Fontes marcadas como conferidas por você.",
+                          );
+                        }}
+                      >
+                        <Icon name={reviewedId === job.id ? "check" : "eye"} />
+                        {reviewedId === job.id
+                          ? "Fontes conferidas"
+                          : "Marcar fontes como conferidas"}
+                      </button>
+                    )}
+                    {!job.selected.length && (
+                      <p>
+                        A seleção aparecerá após conferir os resultados da
+                        busca.
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="comments">
+                    {selected.slice(0, 100).map((r, i) => (
+                      <blockquote key={i}>
+                        <strong>{r.autor || "Autor não informado"}</strong>
+                        <p>{r.comentario}</p>
+                        <small>
+                          {r.video} · {r.curtidas} curtidas
+                        </small>
+                        <CopyButton
+                          text={`${r.comentario}\nFonte: ${r.url_video}`}
+                          label="Copiar comentário"
+                        />
+                      </blockquote>
+                    ))}
+                    {selected.length > 100 && (
+                      <p>
+                        Prévia dos primeiros 100. A exportação inclui todos.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
               {job.warnings.map((w, i) => (
                 <p className="notice" key={i}>
                   {w}
@@ -777,16 +961,20 @@ export default function Home() {
                   )
                 }
               >
-                ↓ Baixar JSON para análise
+                <Icon name="download" /> Baixar JSON para análise
               </button>
               <p>
                 Arquivo: lowwave-analise.json. Reúne todos os comentários
                 baixados, com IDs e fontes, inclusive os que ficaram fora do TXT
                 filtrado. É o arquivo para enviar ao seu Analista de Dores.
               </p>
-              <details>
+              <Accordion>
                 <summary>Outros formatos</summary>
                 <div className="actions">
+                  <CopyButton
+                    text={textFile(job)}
+                    label="Copiar texto filtrado"
+                  />
                   <button
                     onClick={() =>
                       download("lowwave-dados.csv", csvFile(job), "text/csv")
@@ -806,7 +994,7 @@ export default function Home() {
                     Baixar TXT filtrado
                   </button>
                 </div>
-              </details>
+              </Accordion>
             </>
           ) : (
             <>

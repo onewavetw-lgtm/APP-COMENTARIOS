@@ -5,7 +5,7 @@ export default function MotionEffects() {
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (preference.matches || !("IntersectionObserver" in window)) return;
-    const selector = "main .hero, main .card, main .sectionTitle, main .empty";
+    const selector = "main .hero";
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

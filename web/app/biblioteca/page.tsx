@@ -1,4 +1,8 @@
 "use client";
+import Icon from "@/components/icon";
+import Sidebar from "@/components/sidebar";
+import Accordion from "@/components/accordion";
+import CopyButton from "@/components/copy-button";
 import Brand from "@/components/brand";
 import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useMemo, useState } from "react";
@@ -16,7 +20,7 @@ import {
   statuses,
 } from "@/lib/library";
 import { loadJob } from "@/lib/storage";
-function download(name: string, value: unknown) {
+function downloadFile(name: string, value: unknown) {
   const url = URL.createObjectURL(
     new Blob([JSON.stringify(value, null, 2)], { type: "application/json" }),
   );
@@ -47,6 +51,14 @@ export default function Library() {
     [message, setMessage] = useState(""),
     [dirty, setDirty] = useState(false),
     [working, setWorking] = useState(false);
+  function download(name: string, value: unknown) {
+    try {
+      downloadFile(name, value);
+      setMessage(`Download iniciado: ${name}`);
+    } catch {
+      setMessage("Não foi possível iniciar o download. Tente novamente.");
+    }
+  }
   async function refresh() {
     setItems(await listResearch());
   }
@@ -132,6 +144,10 @@ export default function Library() {
           · {Number(row.curtidas) || 0} curtidas · Registro {index + 1}
         </small>
         <p className="original">{row.comentario}</p>
+        <CopyButton
+          text={`${row.comentario}${link ? `\nFonte: ${link}` : ""}`}
+          label="Copiar comentário"
+        />
         <p>
           {String(row.video ?? "Vídeo não informado")}
           {link && (
@@ -144,10 +160,10 @@ export default function Library() {
             </>
           )}
         </p>
-        <details>
+        <Accordion>
           <summary>Identificação e metadados originais</summary>
           <pre>{JSON.stringify(row, null, 2)}</pre>
-        </details>
+        </Accordion>
         <label className="check">
           <input
             type="checkbox"
@@ -189,12 +205,15 @@ export default function Library() {
   }
   return (
     <div className="shell">
-      <aside>
+      <Sidebar>
         <Brand />
         <nav>
-          <a href="/">◎ Nova pesquisa</a>
+          <a href="/">
+            <Icon name="search" />
+            Nova pesquisa
+          </a>
           <a href="/biblioteca" aria-current="location">
-            ▤ Biblioteca
+            <Icon name="library" /> Biblioteca
           </a>
         </nav>
         <p>
@@ -202,7 +221,7 @@ export default function Library() {
           cota do YouTube.
         </p>
         <p>Faça backup antes de limpar dados ou trocar de computador.</p>
-      </aside>
+      </Sidebar>
       <main>
         <header>
           <span>Seu espaço / Biblioteca de pesquisas</span>
@@ -466,173 +485,180 @@ export default function Library() {
                 </button>
               ))}
             </div>
-            {tab === "notes" && (
-              <label>
-                Suas observações sobre esta pesquisa
-                <textarea
-                  rows={4}
-                  value={current.notes}
-                  onChange={(e) => update({ notes: e.target.value })}
-                />
-              </label>
-            )}
-            {(tab === "comments" || tab === "notes") && (
-              <>
-                <p>
-                  Os nomes são públicos e podem ser apelidos ou contas
-                  compartilhadas. Não indicam gênero confirmado nem pessoas
-                  únicas.
-                </p>
+            <div className="tab-panel" key={tab}>
+              {tab === "notes" && (
                 <label>
-                  Buscar nos comentários, autores ou vídeos
-                  <input
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      setPage(0);
-                    }}
-                  />
-                </label>
-                <p>
-                  {rows.length} registros encontrados
-                  {tab === "notes" ? " com favoritos ou anotações" : ""}.
-                </p>
-                {rows
-                  .slice(page * 50, (page + 1) * 50)
-                  .map(({ row, index }) => renderComment(row, index))}
-                <div className="actions">
-                  <button
-                    disabled={page === 0}
-                    onClick={() => setPage(page - 1)}
-                  >
-                    Anterior
-                  </button>
-                  <span>
-                    Página {page + 1} de{" "}
-                    {Math.max(1, Math.ceil(rows.length / 50))}
-                  </span>
-                  <button
-                    disabled={(page + 1) * 50 >= rows.length}
-                    onClick={() => setPage(page + 1)}
-                  >
-                    Próxima
-                  </button>
-                </div>
-              </>
-            )}
-            {tab === "language" && (
-              <>
-                <p>
-                  Expressões literais de 2 a 4 palavras, contadas uma vez por
-                  registro. Não são categorias de dor nem pessoas únicas.
-                  Acentos são preservados; pontuação e maiúsculas são
-                  normalizadas. Expressões sobrepostas podem aparecer.
-                </p>
-                {expressions.length === 0 && (
-                  <p>Nenhuma expressão repetida encontrada nesta amostra.</p>
-                )}
-                <div className="table">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Expressão</th>
-                        <th>Comentários</th>
-                        <th>Vídeos identificados</th>
-                        <th>Exemplos completos</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {expressions.map((g) => (
-                        <tr key={g.phrase}>
-                          <td>
-                            <button
-                              onClick={() => {
-                                setTab("comments");
-                                setQuery(g.phrase);
-                                setPage(0);
-                              }}
-                            >
-                              {g.phrase}
-                            </button>
-                          </td>
-                          <td>{g.count}</td>
-                          <td>{g.videos}</td>
-                          <td>
-                            <details>
-                              <summary>Conferir exemplos</summary>
-                              {g.examples.map((i) => (
-                                <blockquote key={i}>
-                                  {current.source.comentarios[i].comentario}
-                                  <small>
-                                    {String(
-                                      current.source.comentarios[i].autor ??
-                                        "Autor não informado",
-                                    )}
-                                  </small>
-                                </blockquote>
-                              ))}
-                            </details>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <h2>Perguntas nos comentários</h2>
-                <p>
-                  Trechos com ponto de interrogação, sem classificação
-                  automática.
-                </p>
-                {current.source.comentarios
-                  .map((r, i) => ({ r, i }))
-                  .filter(({ r }) => r.comentario.includes("?"))
-                  .slice(0, 50)
-                  .map(({ r, i }) => (
-                    <blockquote key={i}>
-                      {r.comentario}
-                      <small>
-                        {String(r.autor ?? "Autor não informado")} · Registro{" "}
-                        {i + 1}
-                      </small>
-                    </blockquote>
-                  ))}
-              </>
-            )}
-            {tab === "report" && (
-              <>
-                <p>
-                  Guarde aqui o relatório recebido do Analista de Dores. É uma
-                  interpretação externa; o LowWave não verifica suas conclusões
-                  e não altera os comentários originais.
-                </p>
-                <label>
-                  Relatório recebido
+                  Suas observações sobre esta pesquisa
                   <textarea
-                    rows={18}
-                    aria-label="Relatório recebido"
-                    value={current.report}
-                    onChange={(e) => update({ report: e.target.value })}
+                    rows={4}
+                    value={current.notes}
+                    onChange={(e) => update({ notes: e.target.value })}
                   />
                 </label>
-                <label>
-                  Importar relatório de texto (.txt ou .md)
-                  <input
-                    type="file"
-                    accept=".txt,.md,text/plain,text/markdown"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      e.target.value = "";
-                      if (f)
-                        void act(async () => {
-                          if (f.size > 2 * 1024 * 1024)
-                            throw new Error("O relatório deve ter até 2 MB.");
-                          update({ report: await f.text() });
-                        });
-                    }}
-                  />
-                </label>
-              </>
-            )}
+              )}
+              {(tab === "comments" || tab === "notes") && (
+                <>
+                  <p>
+                    Os nomes são públicos e podem ser apelidos ou contas
+                    compartilhadas. Não indicam gênero confirmado nem pessoas
+                    únicas.
+                  </p>
+                  <label>
+                    Buscar nos comentários, autores ou vídeos
+                    <input
+                      value={query}
+                      onChange={(e) => {
+                        setQuery(e.target.value);
+                        setPage(0);
+                      }}
+                    />
+                  </label>
+                  <p>
+                    {rows.length} registros encontrados
+                    {tab === "notes" ? " com favoritos ou anotações" : ""}.
+                  </p>
+                  {rows
+                    .slice(page * 50, (page + 1) * 50)
+                    .map(({ row, index }) => renderComment(row, index))}
+                  <div className="actions">
+                    <button
+                      disabled={page === 0}
+                      onClick={() => setPage(page - 1)}
+                    >
+                      Anterior
+                    </button>
+                    <span>
+                      Página {page + 1} de{" "}
+                      {Math.max(1, Math.ceil(rows.length / 50))}
+                    </span>
+                    <button
+                      disabled={(page + 1) * 50 >= rows.length}
+                      onClick={() => setPage(page + 1)}
+                    >
+                      Próxima
+                    </button>
+                  </div>
+                </>
+              )}
+              {tab === "language" && (
+                <>
+                  <p>
+                    Expressões literais de 2 a 4 palavras, contadas uma vez por
+                    registro. Não são categorias de dor nem pessoas únicas.
+                    Acentos são preservados; pontuação e maiúsculas são
+                    normalizadas. Expressões sobrepostas podem aparecer.
+                  </p>
+                  {expressions.length === 0 && (
+                    <p>Nenhuma expressão repetida encontrada nesta amostra.</p>
+                  )}
+                  <div className="table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Expressão</th>
+                          <th>Comentários</th>
+                          <th>Vídeos identificados</th>
+                          <th>Exemplos completos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {expressions.map((g) => (
+                          <tr key={g.phrase}>
+                            <td>
+                              <button
+                                onClick={() => {
+                                  setTab("comments");
+                                  setQuery(g.phrase);
+                                  setPage(0);
+                                }}
+                              >
+                                {g.phrase}
+                              </button>
+                              <CopyButton
+                                text={g.phrase}
+                                label="Copiar expressão"
+                              />
+                            </td>
+                            <td>{g.count}</td>
+                            <td>{g.videos}</td>
+                            <td>
+                              <Accordion>
+                                <summary>Conferir exemplos</summary>
+                                {g.examples.map((i) => (
+                                  <blockquote key={i}>
+                                    {current.source.comentarios[i].comentario}
+                                    <small>
+                                      {String(
+                                        current.source.comentarios[i].autor ??
+                                          "Autor não informado",
+                                      )}
+                                    </small>
+                                  </blockquote>
+                                ))}
+                              </Accordion>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <h2>Perguntas nos comentários</h2>
+                  <p>
+                    Trechos com ponto de interrogação, sem classificação
+                    automática.
+                  </p>
+                  {current.source.comentarios
+                    .map((r, i) => ({ r, i }))
+                    .filter(({ r }) => r.comentario.includes("?"))
+                    .slice(0, 50)
+                    .map(({ r, i }) => (
+                      <blockquote key={i}>
+                        {r.comentario}
+                        <small>
+                          {String(r.autor ?? "Autor não informado")} · Registro{" "}
+                          {i + 1}
+                        </small>
+                      </blockquote>
+                    ))}
+                </>
+              )}
+              {tab === "report" && (
+                <>
+                  <p>
+                    Guarde aqui o relatório recebido do Analista de Dores. É uma
+                    interpretação externa; o LowWave não verifica suas
+                    conclusões e não altera os comentários originais.
+                  </p>
+                  <label>
+                    Relatório recebido
+                    <textarea
+                      rows={18}
+                      aria-label="Relatório recebido"
+                      value={current.report}
+                      onChange={(e) => update({ report: e.target.value })}
+                    />
+                  </label>
+                  <CopyButton text={current.report} label="Copiar relatório" />
+                  <label>
+                    Importar relatório de texto (.txt ou .md)
+                    <input
+                      type="file"
+                      accept=".txt,.md,text/plain,text/markdown"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        e.target.value = "";
+                        if (f)
+                          void act(async () => {
+                            if (f.size > 2 * 1024 * 1024)
+                              throw new Error("O relatório deve ter até 2 MB.");
+                            update({ report: await f.text() });
+                          });
+                      }}
+                    />
+                  </label>
+                </>
+              )}
+            </div>
           </>
         )}
         <footer>

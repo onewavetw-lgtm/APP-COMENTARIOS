@@ -79,7 +79,7 @@ página personalizada do YouTube; idioma é preferência e Shorts não têm filt
 
 ## Validação atual
 
-- 17 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
+- 20 testes automatizados de API, fluxo, filtros/exportação, links e retomada por cursor.
 - Verificação TypeScript e build de produção.
 - Navegador com API simulada: coleta completa, download real do JSON, persistência
   após recarga sem guardar a chave e tela mobile sem rolagem horizontal indevida.
@@ -248,3 +248,33 @@ O subtítulo “PESQUISA DE PÚBLICO” foi retirado da exibição da logo por e
 CSS apenas na região inferior das letras. O menino e o nome permanecem completos,
 o PNG original é preservado e o texto alternativo da marca agora é “LowWave”.
 Build e conferência visual nos dois temas/páginas/mobile aprovados.
+
+
+## Fluxo, progresso e interações
+
+- Navegação SVG consistente, grupos Pesquisa/Ajustes e fluxo clicável Pesquisar →
+  Conferir fontes → Exportar. A conferência de fontes é marcada manualmente;
+  download é informado como iniciado, sem prometer que o sistema salvou o arquivo.
+- No celular, barra compacta com logo e gaveta de navegação. Escape, retorno de foco,
+  contenção de Tab, fundo bloqueado e `inert` impedem interação com o menu fechado.
+- A onda SVG é indeterminada enquanto a seleção ainda é desconhecida. Durante a
+  leitura, mede vídeos processados/selecionados, sem estimar comentários futuros.
+  Etapas e linhas ganham check só após avançar o checkpoint. “Processado” inclui
+  vídeos sem comentários obtidos; avisos de indisponibilidade continuam visíveis.
+- Skeleton de resultados e brilho de leitura dependem de execução ativa; pausa e
+  espera por limite interrompem a animação. São prévias de carregamento, não dados.
+- Contagem 429 usa prazo absoluto e Retry-After/backoff existentes. Pausar cancela
+  a espera abortável e preserva o prazo restante durante a sessão; continuar fica
+  desabilitado até terminar. A retomada consulta somente a página pendente.
+- Acordeões nativos animam altura por 220ms, inclusive abertura por atalhos. Abas
+  transitam por 180ms. Redução de movimento desativa animações e conserva controles.
+- Cópia de prompt, comentário/fonte, texto filtrado, expressão e relatório com
+  `Copiado ✓` apenas após `clipboard.writeText` resolver. Falhas oferecem cópia manual.
+- Tabelas com cabeçalho fixo, linhas destacadas e legibilidade ampliada. Apenas o
+  banner recebe entrada ao rolar; campos e resultados ficam imediatamente visíveis.
+
+Validação: 20 testes de código; TypeScript/build; navegador com API simulada,
+clipboard real e negado, 429 com pausa/relógio/retomada sem repetir páginas prontas,
+onda indeterminada→50%→100%, checks, conferência manual, JSON completo e íntegro,
+biblioteca, drawer/Escape/teclado/mobile e movimento reduzido. Nenhuma consulta
+real ao YouTube foi usada nos testes.
