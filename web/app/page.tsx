@@ -749,7 +749,7 @@ export default function Home() {
         <section id="export" className="card export" tabIndex={-1}>
           {job && job.rows.length > 0 ? (
             <>
-              <small>LEVAR PARA SEU AGENTE</small>
+              <small>JSON · ARQUIVO COMPLETO PARA SEU AGENTE</small>
               <h2>Uma pesquisa. Um arquivo. Tudo para analisar.</h2>
               <p>
                 {job.rows.length} comentários baixados com IDs, fontes e
@@ -768,12 +768,12 @@ export default function Home() {
                   )
                 }
               >
-                ↓ Baixar para análise
+                ↓ Baixar JSON para análise
               </button>
               <p>
-                Mesmo formato do aplicativo local. O arquivo reúne todos os
-                registros baixados, não apenas os filtrados. O agente continua
-                responsável pela análise.
+                Arquivo: lowwave-analise.json. Reúne todos os comentários baixados,
+                com IDs e fontes, inclusive os que ficaram fora do TXT filtrado.
+                É o arquivo para enviar ao seu Analista de Dores.
               </p>
               <details>
                 <summary>Outros formatos</summary>
