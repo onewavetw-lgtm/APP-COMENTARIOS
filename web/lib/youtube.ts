@@ -122,6 +122,11 @@ export async function query(
       );
     if (reasons.includes("commentsDisabled"))
       throw new ApiError("Comentários desativados neste vídeo.", 409);
+    if (action === "comments" && reasons.includes("videoNotFound"))
+      throw new ApiError(
+        "Vídeo indisponível para leitura de comentários.",
+        410,
+      );
     if (response.status !== 200)
       throw new ApiError(
         "A API recusou a solicitação. Confira a chave, as permissões e a ativação da YouTube Data API.",

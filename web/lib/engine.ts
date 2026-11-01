@@ -102,8 +102,10 @@ export async function advance(job: Job, api: Api): Promise<Job> {
         pageToken: next.token,
       });
     } catch (error) {
-      if (error instanceof RequestError && error.status === 409) {
-        next.warnings.push(`Comentários desativados: ${video.title}`);
+      if (error instanceof RequestError && [409, 410].includes(error.status)) {
+        next.warnings.push(
+          `${error.status === 409 ? "Comentários desativados" : "Vídeo indisponível"}: ${video.title}`,
+        );
         next.video++;
         next.token = "";
         if (next.video >= next.selected.length) next.phase = "done";

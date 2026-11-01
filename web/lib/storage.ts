@@ -24,8 +24,17 @@ export async function saveJob(job: Job | null) {
             "Não foi possível salvar o progresso. Exporte o parcial antes de fechar a página.",
           ),
         );
+      tx.onabort = tx.onerror;
     });
-    if (job) await archiveJob(job);
+    // The checkpoint is already durable. A library snapshot failure must not
+    // stop the queue or make the UI display an older cursor than the saved one.
+    if (job) {
+      try {
+        await archiveJob(job);
+      } catch {
+        return "O progresso está salvo, mas a biblioteca não pôde ser atualizada. Baixe o JSON como cópia.";
+      }
+    }
   } finally {
     db.close();
   }

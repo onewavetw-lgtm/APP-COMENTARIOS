@@ -333,3 +333,30 @@ As animações respeitam movimento reduzido e a hero não ocupa uma tela inteira
 Build e navegador conferidos: botões/foco/biblioteca, desktop e 320/390px sem overflow,
 temas e movimento reduzido; regressão de coleta simulada, 429, cópia, checks, progresso
 e download JSON íntegro passou. Prévia gerada localmente antes da publicação.
+
+## Recuperação da fila de coleta
+
+`lib/api-client.ts` faz até quatro tentativas sequenciais para a mesma página em
+falhas de rede, timeout e HTTP 408/429/500/502/503/504. Cada tentativa tem limite de
+25 segundos no navegador, incluindo a leitura da resposta. Respostas HTML de gateway
+são tratadas pelo status HTTP. A espera acontece no navegador e respeita Retry-After;
+prazos acima de 60 segundos e falhas persistentes pedem continuação manual. Cada
+nova tentativa é registrada no estimador de cota. Chave recusada e cota esgotada
+não são repetidas automaticamente. Pausar cancela requisição/espera.
+
+O cursor só avança ao receber uma página válida. Vídeo removido (videoNotFound) ou
+comentários desativados geram aviso e liberam os seguintes; falhas de autenticação
+ou persistentes mantêm o vídeo pendente. Não há descarte silencioso da fila.
+
+O checkpoint principal é salvo antes da cópia à biblioteca. Falha nessa cópia
+exibe aviso, mas não interrompe a coleta já salva. Falha no checkpoint principal
+interrompe e pede exportação; os dados recebidos continuam visíveis na memória.
+Motivo, horário e prazo de nova tentativa ficam no checkpoint e, quando aplicável,
+no campo adicional `coleta.interrupcao` do JSON. Recarregar requer preencher a chave
+novamente e clicar em Continuar coleta. O navegador precisa permanecer aberto para
+executar a fila; esta alteração não cria processamento em segundo plano no servidor.
+
+A exportação distingue coleta parcial de concluída e mostra vídeos processados.
+Validação: 26 testes automáticos; cenário de 30 vídeos/5.869 comentários com falhas
+na segunda página do segundo vídeo, pausa, cota, timeout e retomada sem duplicatas.
+Testes usam dados simulados e não consomem a API do YouTube.

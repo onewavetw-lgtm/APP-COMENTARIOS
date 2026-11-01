@@ -58,6 +58,7 @@ export type Job = {
   video: number;
   rows: RecordRow[];
   warnings: string[];
+  interruption?: { message: string; at: string; retryAt?: number };
 };
 export function parseLinks(text: string) {
   const ids = [];
@@ -224,6 +225,7 @@ export function analysisFile(job: Job) {
       videos_previstos: job.selected.length,
       videos_finalizados: job.video,
       avisos: job.warnings,
+      ...(job.interruption ? { interrupcao: job.interruption } : {}),
     },
     orientacao_da_pesquisa: researchPrompt(job),
     total_registros: job.rows.length,

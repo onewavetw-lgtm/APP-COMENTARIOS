@@ -11,6 +11,7 @@ import CollectionProgress, {
   useCountdown,
 } from "@/components/collection-progress";
 import { waitUntil } from "@/lib/presentation";
+import { requestYouTube } from "@/lib/api-client";
 import Brand from "@/components/brand";
 import ThemeToggle from "@/components/theme-toggle";
 import { useEffect, useRef, useState } from "react";
@@ -24,7 +25,7 @@ import {
   filteredRows,
   textFile,
 } from "@/lib/model";
-import { advance, RequestError, YouTubeData } from "@/lib/engine";
+import { advance, YouTubeData } from "@/lib/engine";
 import { loadJob, saveJob } from "@/lib/storage";
 import { archiveLegacyJob } from "@/lib/library";
 import QuotaMeter, { QuotaMeterHandle } from "@/components/quota-meter";
@@ -60,6 +61,7 @@ export default function Home() {
     [busy, setBusy] = useState(false),
     [ready, setReady] = useState(false),
     [message, setMessage] = useState(""),
+    [storageWarning, setStorageWarning] = useState(""),
     [tab, setTab] = useState("sources"),
     [cooldownUntil, setCooldownUntil] = useState(0),
     [retryUntil, setRetryUntil] = useState(0),
@@ -84,7 +86,12 @@ export default function Home() {
       .then(async (saved) => {
         setJob(saved);
         if (saved) {
-          await archiveLegacyJob(saved);
+          setCooldownUntil(saved.interruption?.retryAt ?? 0);
+          await archiveLegacyJob(saved).catch(() =>
+            setStorageWarning(
+              "O progresso foi recuperado, mas a biblioteca não pôde ser atualizada. Baixe o JSON como cópia.",
+            ),
+          );
           setLinks(
             saved.settings.links
               .map((id) => `https://www.youtube.com/watch?v=${id}`)
@@ -115,78 +122,68 @@ export default function Home() {
     active.current = true;
     setBusy(true);
     setMessage("");
-    let current = initial;
+    let current = { ...initial };
+    delete current.interruption;
     controller.current = new AbortController();
-    try {
-      await saveJob(current);
+    const signal = controller.current.signal;
+    let retryAt = 0;
+    const checkpoint = async () => {
       setJob(current);
+      setStorageWarning((await saveJob(current)) ?? "");
+    };
+    try {
+      await checkpoint();
       navigate("results");
       const api = async (
         params: Record<string, unknown>,
       ): Promise<YouTubeData> => {
-        // Serial requests only. Waits happen in the browser, never inside a serverless function.
-        for (let attempt = 0; attempt < 4; attempt++) {
-          if (!active.current)
-            throw new Error(
-              "Pesquisa pausada. Você pode continuar de onde parou.",
-            );
-          await quotaMeter.current?.record(params.action as QuotaAction);
-          if (!active.current) throw new Error("Pesquisa pausada.");
-          const response = await fetch("/api/youtube", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...params, key: key.trim() }),
-            signal: controller.current!.signal,
-            cache: "no-store",
-          });
-          const data = await response.json();
-          if (response.ok) return data;
-          if (
-            response.status === 429 &&
-            attempt < 3 &&
-            (data.retryAfter ?? 30) <= 60
-          ) {
-            const wait = Math.max(data.retryAfter ?? 30, 2 ** (attempt + 1));
-            const deadline = Date.now() + wait * 1000;
+        return requestYouTube(params, key, {
+          signal,
+          beforeAttempt: () =>
+            quotaMeter.current?.record(params.action as QuotaAction) ??
+            Promise.resolve(),
+          onWait: (deadline, text) => {
             setRetryUntil(deadline);
-            setMessage("Limite temporário do YouTube. O progresso está salvo.");
-            try {
-              await waitUntil(deadline, controller.current!.signal);
-            } finally {
-              if (controller.current!.signal.aborted && deadline > Date.now())
-                setCooldownUntil(deadline);
-              setRetryUntil(0);
-            }
-            continue;
-          }
-          if (response.status === 429)
-            setCooldownUntil(
-              Date.now() + Math.max(1, data.retryAfter ?? 30) * 1000,
-            );
-          throw new RequestError(
-            data.error ?? "Falha na consulta.",
-            response.status,
-            data.retryAfter ?? 0,
-          );
-        }
-        throw new Error("Não foi possível concluir a página.");
+            setMessage(text);
+          },
+          onCooldown: (deadline) => {
+            retryAt = deadline;
+            setCooldownUntil(deadline);
+          },
+        });
       };
       while (active.current && current.phase !== "done") {
         const next = await advance(current, api);
-        await saveJob(next);
         current = next;
-        setJob(next);
+        await checkpoint();
         setMessage("");
-        await new Promise((r) => setTimeout(r, 350));
+        if (current.phase !== "done") await waitUntil(Date.now() + 350, signal);
       }
     } catch (e) {
-      setMessage(
-        controller.current?.signal.aborted
-          ? "Pesquisa pausada. Continue quando quiser."
-          : e instanceof Error
-            ? e.message
-            : "Falha na coleta.",
-      );
+      const reason = signal.aborted
+        ? "Pesquisa pausada. Continue quando quiser."
+        : e instanceof Error
+          ? e.message
+          : "Falha na coleta.";
+      if (current.phase !== "done") {
+        current = {
+          ...current,
+          interruption: {
+            message: reason,
+            at: new Date().toISOString(),
+            retryAt,
+          },
+        };
+        setJob(current);
+        try {
+          await checkpoint();
+        } catch {
+          setStorageWarning(
+            "Não foi possível salvar o progresso. Baixe o JSON antes de fechar esta página.",
+          );
+        }
+      }
+      setMessage(reason);
     } finally {
       active.current = false;
       setBusy(false);
@@ -282,7 +279,7 @@ export default function Home() {
     };
     setJob(updated);
     try {
-      await saveJob(updated);
+      setStorageWarning((await saveJob(updated)) ?? "");
       setMessage(
         "Filtros e prompt aplicados aos dados salvos. Nenhuma consulta ao YouTube foi feita.",
       );
@@ -694,6 +691,11 @@ export default function Home() {
             {message}
           </div>
         )}
+        {storageWarning && (
+          <div role="status" className="notice">
+            {storageWarning}
+          </div>
+        )}
         {(retryLeft > 0 || cooldown > 0) && (
           <RetryCountdown
             seconds={retryLeft || cooldown}
@@ -754,6 +756,32 @@ export default function Home() {
                 {job.settings.terms.join(" · ") || "Links informados"}. O
                 progresso não é sincronizado entre dispositivos.
               </p>
+              {!busy && job.phase !== "done" && (
+                <div className="notice" role="status">
+                  <strong>
+                    A coleta não terminou: {job.video} de{" "}
+                    {job.selected.length || job.settings.videos} vídeos
+                    processados.
+                  </strong>{" "}
+                  {job.interruption?.message ??
+                    "Há uma coleta salva aguardando continuação."}{" "}
+                  {job.phase === "comments" && job.selected[job.video] && (
+                    <>Próximo a continuar: {job.selected[job.video].title}. </>
+                  )}
+                  {cooldown > 0
+                    ? "Aguarde a contagem para continuar do ponto salvo."
+                    : key.trim()
+                      ? "Clique em Continuar coleta. Os comentários já baixados serão preservados."
+                      : "Preencha sua chave do YouTube e clique em Continuar coleta."}
+                  {job.interruption && (
+                    <>
+                      {" "}
+                      Interrupção registrada em{" "}
+                      {new Date(job.interruption.at).toLocaleString("pt-BR")}.
+                    </>
+                  )}
+                </div>
+              )}
               <div className="stats">
                 <div>
                   <strong>{job.selected.length}</strong>vídeos selecionados
@@ -930,13 +958,20 @@ export default function Home() {
         <GlowCard as="section" id="export" className="export" tabIndex={-1}>
           {job && job.rows.length > 0 ? (
             <>
-              <small>JSON · ARQUIVO COMPLETO PARA SEU AGENTE</small>
+              <small>
+                {job.phase === "done"
+                  ? "JSON · COLETA CONCLUÍDA"
+                  : "JSON · COLETA PARCIAL"}
+              </small>
               <h2>Uma pesquisa. Um arquivo. Tudo para analisar.</h2>
               <p>
                 {job.rows.length} comentários baixados com IDs, fontes e
                 instruções.{" "}
                 {job.phase !== "done" && (
-                  <strong>Coleta parcial: há etapas pendentes.</strong>
+                  <strong>
+                    Coleta parcial: {job.video} de {job.selected.length} vídeos
+                    processados. Continue a coleta para ler os demais.
+                  </strong>
                 )}
               </p>
               <button

@@ -32,7 +32,7 @@ export function RetryCountdown({
     <div className="retry-countdown">
       <Icon name="clock" />
       <div>
-        <strong>Limite temporário do YouTube</strong>
+        <strong>Aguardando nova tentativa</strong>
         <p>
           {automatic
             ? "Repetiremos somente a página pendente em"
