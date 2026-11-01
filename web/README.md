@@ -360,3 +360,23 @@ A exportação distingue coleta parcial de concluída e mostra vídeos processad
 Validação: 26 testes automáticos; cenário de 30 vídeos/5.869 comentários com falhas
 na segunda página do segundo vídeo, pausa, cota, timeout e retomada sem duplicatas.
 Testes usam dados simulados e não consomem a API do YouTube.
+
+## Códigos longos de paginação do YouTube
+
+O erro local “Página inválida” era disparado pelo limite artificial de 1.024
+caracteres em `pageToken`; o envelope HTTP também tinha um limite de 8 KB.
+A validação agora preserva o código opaco exatamente como recebido (sem cortar,
+normalizar ou reconstruir), até 64 Ki caracteres. O corpo HTTP comporta até
+512 KiB, conferidos tanto no cabeçalho quanto nos bytes efetivamente recebidos.
+Destinos fixos e validações de chave, ação, vídeos e buscas permanecem.
+
+`lib/youtube-route.ts` contém o mesmo handler usado pelo POST Next.js e pelos testes
+de integração. Somente o transporte de saída é simulado: cliente, leitura do corpo,
+validação e codificação da URL do Google são executados de verdade. Isso evita a
+lacuna dos testes anteriores, que simulavam a resposta da rota inteira usando
+códigos curtos e não detectavam a recusa na validação do servidor.
+
+Regressão: tokens de 1.025, 4.096, 12.000 e 65.536 caracteres; estado salvo de 1/30
+com 169 comentários retomado até 30/30 e 5.869 registros sem duplicação. Corpos
+excessivos, JSON inválido e tokens malformados continuam recusados. Total: 29 testes.
+Não houve chamadas reais ao YouTube nos testes.

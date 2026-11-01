@@ -1,4 +1,5 @@
 import { fetch as networkFetch, EnvHttpProxyAgent } from "undici";
+import { MAX_PAGE_TOKEN_LENGTH } from "./request-limits";
 export type Action = "search" | "videos" | "comments";
 export class ApiError extends Error {
   constructor(
@@ -58,9 +59,16 @@ export function validate(input: Record<string, unknown>) {
     params.set("order", "relevance");
     params.set("textFormat", "plainText");
   }
-  if (action !== "videos" && input.pageToken) {
-    const token = string(input.pageToken, 1024);
-    if (!token) throw new ApiError("Página inválida.");
+  if (
+    action !== "videos" &&
+    input.pageToken != null &&
+    input.pageToken !== ""
+  ) {
+    const token = string(input.pageToken, MAX_PAGE_TOKEN_LENGTH);
+    if (!token)
+      throw new ApiError(
+        "O código de continuação da página é inválido ou excede o tamanho permitido.",
+      );
     params.set("pageToken", token);
   }
   return { action, params };
